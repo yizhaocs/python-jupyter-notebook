@@ -18,7 +18,7 @@ def pandas_test1():
         df = df.append(df)
 
     print(df.shape)
-    df.to_csv('/Users/yzhao/Downloads/housing_10.csv')
+    df.to_csv('/Users/yzhao/Downloads/housing_10.csv', index=False)
 
 
 if __name__ == '__main__':
