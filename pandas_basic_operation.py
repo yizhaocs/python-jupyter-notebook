@@ -9,6 +9,10 @@ Original file is located at
 
 import pandas as pd
 
+def pandas_shape():
+    input_data = 'Resources/host_health.csv'
+    df = pd.read_csv(input_data, lineterminator='\n')
+    print(f"row count:{df.shape[0]}, column count:{df.shape[1]}") # row count:3549, column count:6
 
 def pandas_unique():
     input_data = 'Resources/host_health.csv'
@@ -32,5 +36,6 @@ def pandas_append_df():
 
 
 if __name__ == '__main__':
-    pandas_unique()
+    # pandas_unique()
+    pandas_shape()
     # pandas_append_df()
