@@ -8,9 +8,55 @@ Original file is located at
 """
 
 import pandas as pd
+import numpy as np
+
+'''
+    https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.reset_index.html
+'''
 
 
-def pandas_shape():
+def reset_index():
+    '''
+                 class  max_speed
+        falcon    bird      389.0
+        parrot    bird       24.0
+        lion    mammal       80.5
+        monkey  mammal        NaN
+    '''
+    df = pd.DataFrame([('bird', 389.0),
+                       ('bird', 24.0),
+                       ('mammal', 80.5),
+                       ('mammal', np.nan)],
+                      index=['falcon', 'parrot', 'lion', 'monkey'],
+                      columns=('class', 'max_speed'))
+    print(df)
+    '''
+        When we reset the index, the old index is added as a column, and a new sequential index is used:
+        
+            index   class  max_speed
+        0  falcon    bird      389.0
+        1  parrot    bird       24.0
+        2    lion  mammal       80.5
+        3  monkey  mammal        NaN
+    '''
+    new_df = df.reset_index()
+    print(new_df)
+
+    '''
+        We can use the drop parameter to avoid the old index being added as a column:
+        
+            class  max_speed
+        0    bird      389.0
+        1    bird       24.0
+        2  mammal       80.5
+        3  mammal        NaN
+    '''
+
+    new_df2 = df.reset_index(drop=True)
+    print(new_df2)
+
+
+def shape():
     input_data = 'Resources/host_health.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
     print(f"row count:{df.shape[0]}, column count:{df.shape[1]}")  # row count:3549, column count:6
@@ -21,7 +67,7 @@ def pandas_shape():
 '''
 
 
-def pandas_unique():
+def unique():
     input_data = 'Resources/host_health.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
     unique_host_name_list = list(df['Host Name'].unique())
@@ -48,7 +94,7 @@ Return Series with number of distinct elements. Can ignore NaN values.
 '''
 
 
-def pandas_nunique():
+def nunique():
     df = pd.DataFrame({'A': [4, 5, 6], 'B': [4, 1, 1]})
     '''
         A    3
@@ -74,7 +120,7 @@ This can be used to group large amounts of data and compute operations on these 
 '''
 
 
-def pandas_groupby():
+def groupby():
     df = pd.DataFrame({'Animal': ['Falcon', 'Falcon', 'Parrot', 'Parrot'],
                        'Speed': [380., 370., 24., 26.]})
     print(df)
@@ -87,7 +133,7 @@ def pandas_groupby():
     print(df_groupby.sum())
 
 
-def pandas_append_df():
+def append():
     input_data = 'Resources/housing.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
 
@@ -101,8 +147,9 @@ def pandas_append_df():
 
 
 if __name__ == '__main__':
-    pandas_nunique()
-    # pandas_unique()
-    # pandas_groupby()
-    # pandas_shape()
-    # pandas_append_df()
+    reset_index()
+    # nunique()
+    # unique()
+    # groupby()
+    # shape()
+    # append()
