@@ -9,7 +9,7 @@ def try_my_operation(second):
         time.sleep(second)
     except:
         print('error')
-    return f"slept for {second}"
+    return {"second": second, 'result': f"slept for {second}"}
 
 
 if __name__ == '__main__':
@@ -18,8 +18,8 @@ if __name__ == '__main__':
         executor = futures.ProcessPoolExecutor(len(seconds))
         task_set = set(executor.submit(try_my_operation, s) for s in seconds)
         futures.wait(task_set, timeout=None, return_when=futures.ALL_COMPLETED)
-        merged_list = [v for f in task_set for v in f.result()]
-        print(merged_list)
+        results = list({f.result()["second"]: f.result()["result"]} for f in task_set)
+        print(results)
     except:
         print('error')
     finally:

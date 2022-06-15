@@ -9,7 +9,7 @@ def try_my_operation(second):
         time.sleep(second)
     except:
         print('error')
-    return f"slept for {second}"
+    return {"second": second, 'result': f"slept for {second}"}
 
 
 if __name__ == '__main__':
