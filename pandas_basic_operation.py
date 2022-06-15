@@ -40,9 +40,40 @@ def pandas_unique():
 
 
 '''
-group by
-https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html
+https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.nunique.html
+
+Count number of distinct elements in specified axis.
+
+Return Series with number of distinct elements. Can ignore NaN values.
 '''
+
+
+def pandas_nunique():
+    df = pd.DataFrame({'A': [4, 5, 6], 'B': [4, 1, 1]})
+    '''
+        A    3
+        B    2
+        dtype: int64
+    '''
+    print(df.nunique())
+    '''
+        0    1
+        1    2
+        2    2
+        dtype: int64
+    '''
+    print(df.nunique(axis=1))
+
+
+'''
+https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html
+
+A groupby operation involves some combination of splitting the object,
+applying a function, and combining the results.
+This can be used to group large amounts of data and compute operations on these groups.
+'''
+
+
 def pandas_groupby():
     df = pd.DataFrame({'Animal': ['Falcon', 'Falcon', 'Parrot', 'Parrot'],
                        'Speed': [380., 370., 24., 26.]})
@@ -70,7 +101,8 @@ def pandas_append_df():
 
 
 if __name__ == '__main__':
+    pandas_nunique()
     # pandas_unique()
-    pandas_groupby()
+    # pandas_groupby()
     # pandas_shape()
     # pandas_append_df()
