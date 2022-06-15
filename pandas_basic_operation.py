@@ -9,15 +9,19 @@ Original file is located at
 
 import pandas as pd
 
+
 def pandas_shape():
     input_data = 'Resources/host_health.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
-    print(f"row count:{df.shape[0]}, column count:{df.shape[1]}") # row count:3549, column count:6
+    print(f"row count:{df.shape[0]}, column count:{df.shape[1]}")  # row count:3549, column count:6
+
 
 '''
-group by 相同Host name的rows
+找出所有unique
 '''
-def pandas_groupby():
+
+
+def pandas_unique():
     input_data = 'Resources/host_health.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
     unique_host_name_list = list(df['Host Name'].unique())
@@ -35,6 +39,22 @@ def pandas_groupby():
         print(same_host_name_group_df['Host Name'])
 
 
+'''
+group by
+https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.groupby.html
+'''
+def pandas_groupby():
+    df = pd.DataFrame({'Animal': ['Falcon', 'Falcon', 'Parrot', 'Parrot'],
+                       'Speed': [380., 370., 24., 26.]})
+    print(df)
+    df_groupby = df.groupby(['Animal'])
+
+    print(df_groupby.keys)  # ['Animal']
+    print(len(df_groupby.groups))  # 2
+
+    print(df_groupby.mean())
+    print(df_groupby.sum())
+
 
 def pandas_append_df():
     input_data = 'Resources/housing.csv'
@@ -50,6 +70,7 @@ def pandas_append_df():
 
 
 if __name__ == '__main__':
+    # pandas_unique()
     pandas_groupby()
     # pandas_shape()
     # pandas_append_df()
