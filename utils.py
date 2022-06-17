@@ -24,8 +24,8 @@ def string_upper(o):
     return o.upper()
 
 '''
-before: 'FSM-GFU-Window2012R2-WIN2012R2-172-30-56-123'
-after: ['-', '-', '-', '-', '-', '-', '-', '0', '0', '0', '1', '1', '1', '1', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '5', '6', '7', 'F', 'F', 'G', 'I', 'M', 'N', 'R', 'R', 'S', 'U', 'W', 'W', 'd', 'i', 'n', 'o', 'w']
+before: '123-daxac'
+after: ['-', '1', '2', '3', 'a', 'a', 'c', 'd', 'x']
 '''
 def string_sorted(s):
     return sorted(s)
@@ -56,5 +56,5 @@ def string_compression(s):
     return res
 
 if __name__ == '__main__':
-    s = "FSM-GFU-Window2012R2-WIN2012R2-172-30-56-123"
+    s = "123-daxac"
     print(string_sorted(s))
