@@ -16,9 +16,9 @@ if __name__ == '__main__':
     try:
         seconds = [1, 2, 3]
         executor = futures.ProcessPoolExecutor(len(seconds))
-        task_set = set(executor.submit(try_my_operation, s) for s in seconds)
-        futures.wait(task_set, timeout=None, return_when=futures.ALL_COMPLETED)
-        results = list({f.result()["second"]: f.result()["result"]} for f in task_set)
+        future_list = list(executor.submit(try_my_operation, s) for s in seconds)
+        futures.wait(future_list, timeout=None, return_when=futures.ALL_COMPLETED)
+        results = list({future.result()["second"]: future.result()["result"]} for future in future_list)
         print(results)
     except:
         print('error')
