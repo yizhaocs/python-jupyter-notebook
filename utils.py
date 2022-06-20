@@ -9,6 +9,8 @@ def thread_sleep(second):
 def object_is_null(o):
     return True if o is None else False
 
+def object_is_not_null(o):
+    return False if o is None else True
 
 def object_deepcopy(o):
     return copy.deepcopy(o)
