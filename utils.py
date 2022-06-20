@@ -3,14 +3,14 @@ import re
 import time
 
 
-def sleep(second):
+def thread_sleep(second):
     time.sleep(second)
 
-def is_null(o):
+def object_is_null(o):
     return True if o is None else False
 
 
-def deepcopy(o):
+def object_deepcopy(o):
     return copy.deepcopy(o)
 
 
