@@ -57,6 +57,11 @@ def string_compression(s):
         res += str(cnt)
     return res
 
+def epoch_time():
+    import time
+    return int(time.time() * 1000)
+
+
 if __name__ == '__main__':
     s = "123-daxac"
     print(string_sorted(s))
