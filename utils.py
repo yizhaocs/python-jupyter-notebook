@@ -26,6 +26,13 @@ def string_upper(o):
     return o.upper()
 
 '''
+before: a b c
+after: abc
+'''
+def string_remove_space(s):
+    return s.replace(" ", "")
+
+'''
 before: '123-daxac'
 after: ['-', '1', '2', '3', 'a', 'a', 'c', 'd', 'x']
 '''
@@ -63,5 +70,5 @@ def epoch_time():
 
 
 if __name__ == '__main__':
-    s = "123-daxac"
-    print(string_sorted(s))
+    s = "123 daxac"
+    print(string_remove_space(s))
