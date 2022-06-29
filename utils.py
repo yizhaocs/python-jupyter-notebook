@@ -15,6 +15,12 @@ def object_is_not_null(o):
 def object_deepcopy(o):
     return copy.deepcopy(o)
 
+'''
+    before: dict = {"x":"123", "y":"", "z": "456"}
+    after: {'x': '123', 'z': '456'}
+'''
+def dict_remove_keys_with_empty_strings(dict):
+    return {k: v for k, v in dict.items() if v}
 
 '''
 before: abc
@@ -72,3 +78,5 @@ def epoch_time():
 if __name__ == '__main__':
     s = "123 daxac"
     print(string_remove_space(s))
+    dict = {"x":"123", "y":"", "z": "456"}
+    print(dict_remove_keys_with_empty_strings(dict))
