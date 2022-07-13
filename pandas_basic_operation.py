@@ -136,14 +136,12 @@ def groupby():
 def append():
     input_data = 'Resources/housing.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
-
-    for i in range(0, 10):
-        df = df.append(df)
-
-    # 21
+    print(df.shape)
+    df = df.append(df)
     print(df.shape)
     # ['FSM-GFU-Window2012R2-WIN2012R2-172-30-56-123', 'ussvnplesx54.fortinet-us.com', 'ussvnplesx58.fortinet-us.com', 'ussvnplesx56.fortinet-us.com', 'ussvnplesx59.fortinet-us.com', 'FSM-GFU1-Window2022-WIN2022-172-30-56-125', 'ussvnplesx51.fortinet-us.com', 'ussvnplesx53.fortinet-us.com', 'ussvnplesx52.fortinet-us.com', 'ussvnplesx57.fortinet-us.com', 'ussvnplesx55.fortinet-us.com', 'FSM-GFU-Window10-WIN10-172-30-56-127', 'FSM-GFU-Window2016-WIN2016test-172-30-56-126.gfu.com', 'WIN-QA-RDP-230', 'FSM-CPWANG-WIND2019-172-30-56-214', 'WIN-2R27C8ADMT3.fortisiem-lab.net', 'FSM-RPRAJUDHA-CENTOS8-NFS217-172.30.57.217', 'fsm-ntwk-wlan01', 'it-rle-oradb-57141', 'FSM-TTRINH-CENTOS8-KAFKA-172.30.56.34', 'HOST-172.30.56.104']
     df.to_csv('/Users/yzhao/Downloads/housing_10.csv', index=False)
+
 
 def to_csv():
     input_data = 'Resources/housing.csv'
