@@ -1,9 +1,25 @@
 import pandas as pd
 import datetime
-
+import time
 from dateutil.relativedelta import relativedelta
 
-if __name__ == '__main__':
+def datetime_increment():
+    first_datetime = datetime.datetime.strptime('2005-06-07 07:00:00', '%Y-%m-%d %H:%M:%S')
+    future_datetime = first_datetime + relativedelta(days=2)
+    print(f'future_datetime:{future_datetime}')
+    future_datetime = future_datetime + relativedelta(hours=2)
+    print(f'future_datetime:{future_datetime}')
+
+def datetime_diff():
+    first_datetime = datetime.datetime.strptime('2005-06-07 07:00:00', '%Y-%m-%d %H:%M:%S')
+    second_datetime = datetime.datetime.strptime('2005-06-07 09:00:00', '%Y-%m-%d %H:%M:%S')
+    second_to_first_diff = second_datetime - first_datetime
+    print(f'second_datetime - first_datetime:{second_to_first_diff}') # second_datetime - first_datetime:2:00:00
+
+def epoch_time():
+    return int(time.time() * 1000)
+
+def fortinet_feature():
     input_data = 'Resources/internet_traffic_raw_data.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
     first_datetime = datetime.datetime.strptime(df['_time'][0], '%Y-%m-%d %H:%M:%S')
@@ -43,3 +59,10 @@ if __name__ == '__main__':
     #               dtype='datetime64[ns]', length=613, freq='2H')
     furture_datetime_fill_in_with_frequency = pd.date_range(last_datetime, future_datetime, freq=second_to_first_diff)
     print(furture_datetime_fill_in_with_frequency)
+
+
+if __name__ == '__main__':
+    # datetime_increment()
+    # datetime_diff()
+    # epoch_time()
+    fortinet_feature()
