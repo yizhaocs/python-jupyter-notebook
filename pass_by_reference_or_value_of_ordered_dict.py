@@ -9,8 +9,21 @@ def add_more(dict):
     print("Inside Function", dict)
 
 
+def remove(dict, key):
+    dict.pop(key)
+
+
 def move_to_end(dict, key):
     dict.move_to_end(key)
+
+
+def move_to_front(dict, key):
+    '''
+        For Python 3.2 and later, you should use the move_to_end method.
+        The method accepts a last argument which indicates whether the element will be moved to the bottom (last=True)
+        or the top (last=False) of the OrderedDict.
+    '''
+    dict.move_to_end(key, last=False)
 
 
 if __name__ == '__main__':
@@ -21,4 +34,7 @@ if __name__ == '__main__':
     print("Outside Function:", dict)
 
     move_to_end(dict, 'first')
+    print("Outside Function:", dict)
+
+    move_to_front(dict, 'first')
     print("Outside Function:", dict)
