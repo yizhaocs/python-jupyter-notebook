@@ -32,6 +32,15 @@ def string_upper(o):
     return o.upper()
 
 '''
+before: ABC
+after: abc
+'''
+
+
+def string_lower(o):
+    return o.lower()
+
+'''
 before: a b c
 after: abc
 '''
