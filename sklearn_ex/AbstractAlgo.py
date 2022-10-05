@@ -81,7 +81,7 @@ class AbstractClassifier(AbstractAlgo):
     def __init__(self):
         self.ss_feature = StandardScaler()
 
-    def evaluate(self, y_true, y_pred):
+    def evaluate(self, y_true, y_pred, is_one_hot_encoding_on):
         confusion_matrix = pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'])
         confusion = {
             "True Negative": int(confusion_matrix.iloc[0, 0]),
@@ -90,14 +90,31 @@ class AbstractClassifier(AbstractAlgo):
             "True Positive": int(confusion_matrix.iloc[1, 1])
         }
 
-        errors = {
-            'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
-            'F1 Score': round(f1_score(y_true, y_pred), DECIMAL_PRECISION),
-            'Recall': round(recall_score(y_true, y_pred), DECIMAL_PRECISION),
-            'Precision': round(precision_score(y_true, y_pred), DECIMAL_PRECISION),
-            'ROC AUC': round(roc_auc_score(y_true, y_pred), DECIMAL_PRECISION),
-            'Confusion': confusion
-        }
+
+        if is_one_hot_encoding_on:
+            errors = {
+                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
+                'F1 Score': round(f1_score(y_true, y_pred,
+                                               pos_label='positive',
+                                               average='micro'), DECIMAL_PRECISION),
+                'Recall': round(recall_score(y_true, y_pred,
+                                               pos_label='positive',
+                                               average='micro'), DECIMAL_PRECISION),
+                'Precision': round(precision_score(y_true, y_pred,
+                                               pos_label='positive',
+                                               average='micro'), DECIMAL_PRECISION),
+                # 'ROC AUC': round(roc_auc_score(y_true, y_pred, multi_class='ovr'), DECIMAL_PRECISION),
+                'Confusion': confusion
+            }
+        else:
+            errors = {
+                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
+                'F1 Score': round(f1_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Recall': round(recall_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Precision': round(precision_score(y_true, y_pred), DECIMAL_PRECISION),
+                'ROC AUC': round(roc_auc_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Confusion': confusion
+            }
 
         metrics = {FITTED_ERRORS: errors}
 

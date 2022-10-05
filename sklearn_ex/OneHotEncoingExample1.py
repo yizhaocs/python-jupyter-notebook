@@ -3,18 +3,19 @@ import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
 
-feature_columns = ["Event Name"]
+
 
 df = pd.read_csv("../Resources/report1664845422878.csv")
 print(f'df.head():{df.head()}')
 print(f'df.tail():{df.tail()}')
 print(f'df.dtypes:{df.dtypes}')
-
 print(f'df["Event Type"].unique():{df["Event Name"].unique()}')
 
+
+ohe_columns = ["Event Name"]
 ohe = OneHotEncoder()
 
-feature_arry = ohe.fit_transform(df[feature_columns]).toarray()
+feature_arry = ohe.fit_transform(df[ohe_columns]).toarray()
 print(f'feature_arry:{feature_arry}')
 print(f'ohe.categories_:{ohe.categories_}')
 # feature_labels = ohe.categories_
