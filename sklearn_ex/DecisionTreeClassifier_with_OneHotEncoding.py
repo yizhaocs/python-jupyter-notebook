@@ -8,6 +8,7 @@ from sklearn_ex.AbstractAlgo import AbstractClassifier
 from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION
 from sklearn_ex.utils.param_utils import parse_params
 
+
 class DecisionTreeClassifier_with_OneHotEncoding(AbstractClassifier):
 
     def __init__(self, options):
@@ -19,7 +20,6 @@ class DecisionTreeClassifier_with_OneHotEncoding(AbstractClassifier):
             floats=['min_weight_fraction_leaf', 'min_impurity_decrease', 'ccp_alpha']
         )
         self.estimator = _DecisionTreeClassifier(**input_params)
-
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     raw_data = pd.read_csv('../Resources/report1664845422878.csv')
 
     options = {
-        'feature_attrs': ['Event Name'],
+        'feature_attrs': ['Event Name', 'Incident Reporting Device', 'Incident Target', 'Host Name'],
         'target_attr': 'Incident Status',
         'train_factor': 0.7
     }
