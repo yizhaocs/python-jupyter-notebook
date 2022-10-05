@@ -35,12 +35,12 @@ class DecisionTreeClassifier_with_OneHotEncoding(AbstractClassifier):
 
         ####################################################################################################
         ohe = OneHotEncoder()
-        feature_data = ohe.fit_transform(feature_data).toarray()
+        feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()
         ####################################################################################################
 
         # 1. Split the data randomly with 70:30 of train and test.
         feature_train, feature_test, target_train, target_test = \
-            train_test_split(feature_data, target_data, random_state=42, shuffle=False,
+            train_test_split(feature_data_with_one_hot_encoding, target_data, random_state=42, shuffle=False,
                              test_size=1 - float(options['train_factor']))
         self.ss_feature = StandardScaler()
         # 2. Standardlize the train and test data of features.
