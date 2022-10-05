@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier as _DecisionTreeClassifier
 from sklearn_ex.AbstractAlgo import AbstractClassifier
+from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE
 from sklearn_ex.utils.param_utils import parse_params
 
 DIFF_NAME = 'error'
@@ -83,6 +84,7 @@ if __name__ == '__main__':
     print(json.dumps(metrics, indent=2))
 
     infer_data = raw_data.iloc[:, :]
-    options.update({'model': pickle.dumps(model)})
+    # options.update({'model': pickle.dumps(model)})
+    options.update({'model': {MODEL_TYPE_SINGLE: model}})
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
