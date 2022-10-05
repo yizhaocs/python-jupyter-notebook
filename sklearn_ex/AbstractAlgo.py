@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, \
     recall_score, precision_score, roc_auc_score
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn_ex.utils.const_utils import *
 from sklearn_ex.utils.excp_utils import phMLNotImplError
 
@@ -125,7 +125,9 @@ class AbstractClassifier(AbstractAlgo):
         model = model_file[MODEL_TYPE_SINGLE]
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
-        ss_feature_data = self.ss_feature.fit_transform(feature_data)
+        ohe = OneHotEncoder()
+        feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()
+        ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
         y_pred = model.predict(ss_feature_data)
         target_attr = options['target_attr']
         output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)

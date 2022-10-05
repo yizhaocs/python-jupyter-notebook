@@ -5,14 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier as _DecisionTreeClassifier
 from sklearn_ex.AbstractAlgo import AbstractClassifier
-from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE
+from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION
 from sklearn_ex.utils.param_utils import parse_params
-
-DIFF_NAME = 'error'
-PRIDCT_NAME = 'predicted'
-DECIMAL_PRECISION = 2
-FITTED_PARAMS = 'fitted_parameter'
-
 
 class DecisionTreeClassifier_with_OneHotEncoding(AbstractClassifier):
 
@@ -92,3 +86,5 @@ if __name__ == '__main__':
     options.update({'model': {MODEL_TYPE_SINGLE: model}})
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
+
+    output.to_csv('/Users/yzhao/Downloads/test_3.csv', index=False)

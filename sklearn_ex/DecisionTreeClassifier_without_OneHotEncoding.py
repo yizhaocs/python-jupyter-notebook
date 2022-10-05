@@ -5,14 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier as _DecisionTreeClassifier
 from sklearn_ex.AbstractAlgo import AbstractClassifier
-from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE
+from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, DECIMAL_PRECISION, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME
 from sklearn_ex.utils.param_utils import parse_params
-
-DIFF_NAME = 'error'
-PRIDCT_NAME = 'predicted'
-DECIMAL_PRECISION = 2
-FITTED_PARAMS = 'fitted_parameter'
-
 
 class DecisionTreeClassifier_without_OneHotEncoding(AbstractClassifier):
 
