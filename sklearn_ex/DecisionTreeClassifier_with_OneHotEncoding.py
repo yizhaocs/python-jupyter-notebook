@@ -70,12 +70,29 @@ if __name__ == '__main__':
     import json
 
     raw_data = pd.read_csv('../Resources/report1665086402032.csv')
-
+    incident_target_parsed = raw_data['Incident Target'].str.split(pat = ',', expand = False)
+    print(incident_target_parsed.head())
+    print(incident_target_parsed.iloc[0])
+    print(incident_target_parsed.iloc[0][0])
+    for i in range(len(incident_target_parsed)):
+        e = incident_target_parsed.iloc[i]
+        if isinstance(e, list):
+            print(f'e:{e}')
+            for i in range(0, len(e)):
+                if 'hostIpAddr' in e[i]:
+                    print(f'hostIpAddr:{e[i]}')
+                elif 'hostName' in e[i]:
+                    print(f'hostName:{e[i]}')
+                elif 'targetHostName' in e[i]:
+                    print(f'targetHostName:{e[i]}')
+    # raw_data[['incident_target_parsed_hostName', 'incident_target_parsed_hostIpAddr', 'incident_target_parsed_datacenter']] = incident_target_parsed
     options = {
         'feature_attrs': [
             'Event Name',
             'DayOfWeek(Event Receive Time)',
             'HourOfDay(Event Receive Time)',
+            # 'incident_target_parsed_hostName',
+            # 'incident_target_parsed_hostIpAddr',
             'Incident Source', # Source IP
             'Incident Reporting Device', # Reporting IP
             'Incident Category',
