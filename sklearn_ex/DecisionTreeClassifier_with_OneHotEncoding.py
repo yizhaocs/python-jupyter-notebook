@@ -72,7 +72,7 @@ if __name__ == '__main__':
     raw_data = pd.read_csv('../Resources/report1664845422878.csv')
 
     options = {
-        'feature_attrs': ['Event Name', 'Incident Reporting Device', 'Incident Target', 'Host Name'],
+        'feature_attrs': ['Event Name', 'Incident Reporting Device', 'Incident Category'],
         'target_attr': 'Incident Status',
         'train_factor': 0.7
     }
