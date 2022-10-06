@@ -69,10 +69,17 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/report1664845422878.csv')
+    raw_data = pd.read_csv('../Resources/report1665086402032.csv')
 
     options = {
-        'feature_attrs': ['Event Name', 'Incident Reporting Device', 'Incident Category', 'Attack Technique'],
+        'feature_attrs': [
+            'Event Name',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)',
+            'Incident Source', # Source IP
+            'Incident Reporting Device', # Reporting IP
+            'Incident Category',
+            'Attack Technique'],
         'target_attr': 'Incident Status',
         'train_factor': 0.7
     }
