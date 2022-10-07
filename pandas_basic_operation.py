@@ -133,6 +133,23 @@ def groupby():
     print(df_groupby.sum())
 
 
+def print_columns():
+    raw_data_df = pd.read_csv('Resources/housing.csv', lineterminator='\n')
+    print(f'raw_data_df.columns:{raw_data_df.columns}')
+
+# 添加一个新的column从新的数据list[]中
+def concat():
+    new_data = []
+    raw_data_df = pd.read_csv('Resources/housing.csv', lineterminator='\n')
+    for i in range(raw_data_df.shape[1]):
+        new_data.append(i)
+
+    print(f'raw_data_df.columns:{raw_data_df.columns}')
+    new_data_df = pd.DataFrame(new_data, columns=['new_data'])
+    raw_data_df = pd.concat([raw_data_df, new_data_df], axis=1)
+    print(f'raw_data_df.columns:{raw_data_df.columns}')
+
+
 def append():
     input_data = 'Resources/housing.csv'
     df = pd.read_csv(input_data, lineterminator='\n')
@@ -150,10 +167,11 @@ def to_csv():
 
 
 if __name__ == '__main__':
-    reset_index()
+    # reset_index()
     # nunique()
     # unique()
     # groupby()
     # shape()
     # append()
     # to_csv()
+    concat()
