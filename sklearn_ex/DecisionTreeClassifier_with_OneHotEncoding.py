@@ -131,7 +131,7 @@ if __name__ == '__main__':
     incident_status = raw_data['Incident Status']
     incident_resolution = raw_data['Incident Resolution']
     raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
-
+    print(f'raw_data["Incident_Status_with_Incident_Resolution"].unique():{raw_data["Incident_Status_with_Incident_Resolution"].unique()}')
     ##############################################################################################################
     options = {
         'feature_attrs': [
