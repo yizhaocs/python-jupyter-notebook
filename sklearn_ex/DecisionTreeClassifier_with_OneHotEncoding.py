@@ -128,9 +128,9 @@ if __name__ == '__main__':
     raw_data = pd.concat([raw_data, techniqueid_data_df], axis=1)
     print(f'raw_data.columns:{raw_data.columns}')
     ##############################################################################################################
-
-
-
+    incident_status = raw_data['Incident Status']
+    incident_resolution = raw_data['Incident Resolution']
+    raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
 
     ##############################################################################################################
     options = {
@@ -147,7 +147,8 @@ if __name__ == '__main__':
             'HourOfDay(Event Receive Time)',
             'techniqueid'
         ],
-        'target_attr': 'Incident Status',
+        # 'target_attr': 'Incident Status',
+        'target_attr': 'Incident_Status_with_Incident_Resolution',
         'train_factor': 0.7
     }
     decisiontree_classification = DecisionTreeClassifier_with_OneHotEncoding(options)
