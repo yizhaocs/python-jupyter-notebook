@@ -134,13 +134,15 @@ if __name__ == '__main__':
     options = {
         'feature_attrs': [
             'Event Name',
-            'DayOfWeek(Event Receive Time)',
-            'HourOfDay(Event Receive Time)',
+            'Host IP',
+            'Host Name',
+            'Incident Source',
+            'Incident Reporting Device',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'Incident Source',  # Source IP
-            'Incident Reporting Device',  # Reporting IP
             'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)',
             'techniqueid'
         ],
         'target_attr': 'Incident Status',
