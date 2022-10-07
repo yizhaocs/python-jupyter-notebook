@@ -92,17 +92,20 @@ class AbstractClassifier(AbstractAlgo):
 
 
         if is_one_hot_encoding_on:
+            '''
+                average = 'micro', 'macro', 'weighted'
+                Micro-averaged: all samples equally contribute to the final averaged metric
+                Macro-averaged: all classes equally contribute to the final averaged metric
+                Weighted-averaged: each classes’s contribution to the average is weighted by its size
+            '''
             errors = {
                 'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
                 'F1 Score': round(f1_score(y_true, y_pred,
-                                               pos_label='positive',
-                                               average='micro'), DECIMAL_PRECISION),
+                                               average='macro'), DECIMAL_PRECISION),
                 'Recall': round(recall_score(y_true, y_pred,
-                                               pos_label='positive',
-                                               average='micro'), DECIMAL_PRECISION),
+                                               average='macro'), DECIMAL_PRECISION),
                 'Precision': round(precision_score(y_true, y_pred,
-                                               pos_label='positive',
-                                               average='micro'), DECIMAL_PRECISION),
+                                               average='macro'), DECIMAL_PRECISION),
                 # 'ROC AUC': round(roc_auc_score(y_true, y_pred, multi_class='ovr'), DECIMAL_PRECISION),
                 'Confusion': confusion
             }
