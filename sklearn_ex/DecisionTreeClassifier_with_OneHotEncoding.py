@@ -91,18 +91,26 @@ if __name__ == '__main__':
                     print(f'hostName:{s}')
                 elif 'targetHostName' in s:
                     print(f'targetHostName:{s}')
+        else:
+            hostIpAddr_data.append(None)
+            hostName_data.append(None)
+
+    hostIpAddr_data_df = pd.DataFrame(hostIpAddr_data, columns=['incident_target_parsed_hostIpAddr'])
+    hostName_data_df = pd.DataFrame(hostName_data, columns=['incident_target_parsed_hostName'])
+
+    raw_data = pd.concat([raw_data, hostIpAddr_data_df], axis=1)
+    raw_data = pd.concat([raw_data, hostName_data_df], axis=1)
     # raw_data[['incident_target_parsed_hostName', 'incident_target_parsed_hostIpAddr', 'incident_target_parsed_datacenter']] = incident_target_parsed
     options = {
         'feature_attrs': [
             'Event Name',
             'DayOfWeek(Event Receive Time)',
             'HourOfDay(Event Receive Time)',
-            # 'incident_target_parsed_hostName',
-            # 'incident_target_parsed_hostIpAddr',
+            'incident_target_parsed_hostName',
+            'incident_target_parsed_hostIpAddr',
             'Incident Source', # Source IP
             'Incident Reporting Device', # Reporting IP
-            'Incident Category',
-            'Attack Technique'],
+            'Incident Category'],
         'target_attr': 'Incident Status',
         'train_factor': 0.7
     }
