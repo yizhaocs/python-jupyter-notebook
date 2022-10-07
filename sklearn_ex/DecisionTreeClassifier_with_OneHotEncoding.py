@@ -73,26 +73,24 @@ if __name__ == '__main__':
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
-    print(incident_target_parsed.head())
-    print(incident_target_parsed.iloc[0])
-    print(incident_target_parsed.iloc[0][0])
+    # print(incident_target_parsed.head())
+    # print(incident_target_parsed.iloc[0])
+    # print(incident_target_parsed.iloc[0][0])
 
     hostIpAddr_data = []
     hostName_data = []
     for i in range(len(incident_target_parsed)):
         e = incident_target_parsed.iloc[i]
         if isinstance(e, list):
-            print(f'e:{e}')
+            # print(f'e:{e}')
             for i in range(0, len(e)):
                 s = e[i]
                 if 'hostIpAddr' in s:
                     hostIpAddr_data.append(s.partition(':')[2])
-                    print(f'hostIpAddr:{s}')
+                    # print(f'hostIpAddr:{s}')
                 elif 'hostName' in s:
                     hostName_data.append(s.partition(':')[2])
-                    print(f'hostName:{s}')
-                elif 'targetHostName' in s:
-                    print(f'targetHostName:{s}')
+                    # print(f'hostName:{s}')
         else:
             hostIpAddr_data.append(None)
             hostName_data.append(None)
@@ -109,17 +107,18 @@ if __name__ == '__main__':
     for i in range(len(attack_tactic_parsed)):
         e = attack_tactic_parsed.iloc[i]
         if e and isinstance(e, list):
-            print(f'e:{e}')
+            # print(f'e:{e}')
             for i in range(0, len(e)):
                 s = e[i]
                 if 'techniqueid' in s:
                     techniqueid_data.append(s.partition(':')[2])
-                    print(f'techniqueid:{s}')
+                    # print(f'techniqueid:{s}')
         else:
             techniqueid_data.append(None)
 
     techniqueid_data_df = pd.DataFrame(techniqueid_data, columns=['techniqueid'])
     raw_data = pd.concat([raw_data, techniqueid_data_df], axis=1)
+    print(f'raw_data.columns:{raw_data.columns}')
     ##############################################################################################################
     #
     #
