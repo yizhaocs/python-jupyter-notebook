@@ -70,7 +70,9 @@ if __name__ == '__main__':
     import json
 
     raw_data = pd.read_csv('../Resources/report1665086402032.csv')
-    incident_target_parsed = raw_data['Incident Target'].str.split(pat = ',', expand = False)
+
+    ############################################################################################################################################
+    incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
     print(incident_target_parsed.head())
     print(incident_target_parsed.iloc[0])
     print(incident_target_parsed.iloc[0][0])
@@ -100,7 +102,28 @@ if __name__ == '__main__':
 
     raw_data = pd.concat([raw_data, hostIpAddr_data_df], axis=1)
     raw_data = pd.concat([raw_data, hostName_data_df], axis=1)
-    # raw_data[['incident_target_parsed_hostName', 'incident_target_parsed_hostIpAddr', 'incident_target_parsed_datacenter']] = incident_target_parsed
+    ############################################################################################################################################
+    attack_tactic_parsed = raw_data['Attack Technique'].str.split(pat=',', expand=False)
+    techniqueid_data = []
+
+    for i in range(len(attack_tactic_parsed)):
+        e = attack_tactic_parsed.iloc[i]
+        if e and isinstance(e, list):
+            print(f'e:{e}')
+            for i in range(0, len(e)):
+                s = e[i]
+                if 'techniqueid' in s:
+                    techniqueid_data.append(s.partition(':')[2])
+                    print(f'techniqueid:{s}')
+        else:
+            techniqueid_data.append(None)
+
+    techniqueid_data_df = pd.DataFrame(techniqueid_data, columns=['techniqueid'])
+    raw_data = pd.concat([raw_data, techniqueid_data_df], axis=1)
+    ##############################################################################################################
+    #
+    #
+    # ##############################
     options = {
         'feature_attrs': [
             'Event Name',
@@ -108,9 +131,10 @@ if __name__ == '__main__':
             'HourOfDay(Event Receive Time)',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'Incident Source', # Source IP
-            'Incident Reporting Device', # Reporting IP
-            'Incident Category'],
+            'Incident Source',  # Source IP
+            'Incident Reporting Device',  # Reporting IP
+            'Incident Category',
+            'techniqueid'],
         'target_attr': 'Incident Status',
         'train_factor': 0.7
     }
