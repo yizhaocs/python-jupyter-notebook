@@ -111,7 +111,13 @@ if __name__ == '__main__':
             for i in range(0, len(e)):
                 s = e[i]
                 if 'techniqueid' in s:
-                    techniqueid_data.append(s.partition(':')[2])
+                    import re
+
+                    techniqueid = s.partition(':')[2]
+                    techniqueid = re.sub(r'}]', '', techniqueid)
+                    techniqueid = re.sub(r'"', '', techniqueid)
+                    techniqueid_data.append(techniqueid)
+                    break
                     # print(f'techniqueid:{s}')
         else:
             techniqueid_data.append(pd.np.nan)
