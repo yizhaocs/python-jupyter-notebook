@@ -74,17 +74,23 @@ if __name__ == '__main__':
     print(incident_target_parsed.head())
     print(incident_target_parsed.iloc[0])
     print(incident_target_parsed.iloc[0][0])
+
+    hostIpAddr_data = []
+    hostName_data = []
     for i in range(len(incident_target_parsed)):
         e = incident_target_parsed.iloc[i]
         if isinstance(e, list):
             print(f'e:{e}')
             for i in range(0, len(e)):
-                if 'hostIpAddr' in e[i]:
-                    print(f'hostIpAddr:{e[i]}')
-                elif 'hostName' in e[i]:
-                    print(f'hostName:{e[i]}')
-                elif 'targetHostName' in e[i]:
-                    print(f'targetHostName:{e[i]}')
+                s = e[i]
+                if 'hostIpAddr' in s:
+                    hostIpAddr_data.append(s.partition(':')[2])
+                    print(f'hostIpAddr:{s}')
+                elif 'hostName' in s:
+                    hostName_data.append(s.partition(':')[2])
+                    print(f'hostName:{s}')
+                elif 'targetHostName' in s:
+                    print(f'targetHostName:{s}')
     # raw_data[['incident_target_parsed_hostName', 'incident_target_parsed_hostIpAddr', 'incident_target_parsed_datacenter']] = incident_target_parsed
     options = {
         'feature_attrs': [
