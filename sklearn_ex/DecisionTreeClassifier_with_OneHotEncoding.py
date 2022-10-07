@@ -114,8 +114,10 @@ if __name__ == '__main__':
                     import re
 
                     techniqueid = s.partition(':')[2]
-                    techniqueid = re.sub(r'}]', '', techniqueid)
-                    techniqueid = re.sub(r'"', '', techniqueid)
+
+                    list_of_char = ['\"', '}', '\]']
+                    pattern = '[' + ''.join(list_of_char) + ']'
+                    techniqueid = re.sub(pattern, '', techniqueid)
                     techniqueid_data.append(techniqueid)
                     break
                     # print(f'techniqueid:{s}')
