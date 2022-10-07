@@ -92,8 +92,8 @@ if __name__ == '__main__':
                     hostName_data.append(s.partition(':')[2])
                     # print(f'hostName:{s}')
         else:
-            hostIpAddr_data.append(None)
-            hostName_data.append(None)
+            hostIpAddr_data.append(pd.np.nan)
+            hostName_data.append(pd.np.nan)
 
     hostIpAddr_data_df = pd.DataFrame(hostIpAddr_data, columns=['incident_target_parsed_hostIpAddr'])
     hostName_data_df = pd.DataFrame(hostName_data, columns=['incident_target_parsed_hostName'])
@@ -114,7 +114,7 @@ if __name__ == '__main__':
                     techniqueid_data.append(s.partition(':')[2])
                     # print(f'techniqueid:{s}')
         else:
-            techniqueid_data.append(None)
+            techniqueid_data.append(pd.np.nan)
 
     techniqueid_data_df = pd.DataFrame(techniqueid_data, columns=['techniqueid'])
     raw_data = pd.concat([raw_data, techniqueid_data_df], axis=1)
@@ -133,7 +133,8 @@ if __name__ == '__main__':
             'Incident Source',  # Source IP
             'Incident Reporting Device',  # Reporting IP
             'Incident Category',
-            'techniqueid'],
+            'techniqueid'
+        ],
         'target_attr': 'Incident Status',
         'train_factor': 0.7
     }
