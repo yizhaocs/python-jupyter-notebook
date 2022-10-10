@@ -81,44 +81,33 @@ class AbstractClassifier(AbstractAlgo):
     def __init__(self):
         self.ss_feature = StandardScaler()
 
-    def evaluate(self, y_true, y_pred, is_one_hot_encoding_on):
-        confusion_matrix = pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'])
-        confusion = {
-            "True Negative": int(confusion_matrix.iloc[0, 0]),
-            "False Positive": int(confusion_matrix.iloc[0, 1]),
-            "False Negative": int(confusion_matrix.iloc[1, 0]),
-            "True Positive": int(confusion_matrix.iloc[1, 1])
+    def evaluate(self, y_true, y_pred):
+        labels = y_true.unique()
+        y_true = y_true.values
+
+        from sklearn.metrics import multilabel_confusion_matrix, classification_report
+        confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
+        classification_report = classification_report(y_true, y_pred, labels=labels, output_dict = True)
+        # print(classification_report)
+
+        confusion_metrix_dict = {}
+        for label_col in range(len(labels)):
+            confusion_matrix = confusion_matrix_with_labels[label_col]
+            confusion = {
+                "True Positive": int(confusion_matrix[1, 1]),
+                "False Negative": int(confusion_matrix[1, 0]),
+            }
+            confusion_metrix_dict[labels[label_col]] = confusion
+
+        # for label, matrix in confusion_metrix_dict.items():
+        #     print("Confusion matrix for label {}:".format(label))
+        #     print(matrix)
+
+        errors = {
+            'Class': labels.tolist(),
+            'Classification Report': classification_report,
+            'Confusion': confusion_metrix_dict
         }
-
-
-        if is_one_hot_encoding_on:
-            '''
-                average = 'micro', 'macro', 'weighted'
-                Micro-averaged: all samples equally contribute to the final averaged metric
-                Macro-averaged: all classes equally contribute to the final averaged metric
-                Weighted-averaged: each classes’s contribution to the average is weighted by its size
-            '''
-            errors = {
-                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
-                'F1 Score': round(f1_score(y_true, y_pred,
-                                               average='macro'), DECIMAL_PRECISION),
-                'Recall': round(recall_score(y_true, y_pred,
-                                               average='macro'), DECIMAL_PRECISION),
-                'Precision': round(precision_score(y_true, y_pred,
-                                               average='macro'), DECIMAL_PRECISION),
-                # 'ROC AUC': round(roc_auc_score(y_true, y_pred, multi_class='ovr'), DECIMAL_PRECISION),
-                'Confusion': confusion
-            }
-        else:
-            errors = {
-                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
-                'F1 Score': round(f1_score(y_true, y_pred), DECIMAL_PRECISION),
-                'Recall': round(recall_score(y_true, y_pred), DECIMAL_PRECISION),
-                'Precision': round(precision_score(y_true, y_pred), DECIMAL_PRECISION),
-                'ROC AUC': round(roc_auc_score(y_true, y_pred), DECIMAL_PRECISION),
-                'Confusion': confusion
-            }
-
         metrics = {FITTED_ERRORS: errors}
 
         return metrics

@@ -50,7 +50,7 @@ class DecisionTreeClassifier_with_OneHotEncoding(AbstractClassifier):
                 pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
-        metrics = self.evaluate(target_data, y_pred, True)
+        metrics = self.evaluate(target_data, y_pred)
         feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
         metrics[FITTED_PARAMS] = fitted_parameter
