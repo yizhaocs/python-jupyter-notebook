@@ -82,35 +82,56 @@ class AbstractClassifier(AbstractAlgo):
         self.ss_feature = StandardScaler()
 
     def evaluate(self, y_true, y_pred):
-        labels = y_true.unique()
-        y_true = y_true.values
+        # true if Multi-class Classification
+        classes = y_true.unique()
+        if len(classes) > 2:
+            from sklearn.metrics import multilabel_confusion_matrix, classification_report
+            confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=classes)
+            classification_report = classification_report(y_true, y_pred, labels=classes, output_dict = True)
+            # print(classification_report)
 
-        from sklearn.metrics import multilabel_confusion_matrix, classification_report
-        confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
-        classification_report = classification_report(y_true, y_pred, labels=labels, output_dict = True)
-        # print(classification_report)
+            confusion_metrix_dict = {}
+            for label_col in range(len(classes)):
+                confusion_matrix = confusion_matrix_with_labels[label_col]
+                confusion = {
+                    "True Positive": int(confusion_matrix[1, 1]),
+                    "False Negative": int(confusion_matrix[1, 0]),
+                }
+                confusion_metrix_dict[classes[label_col]] = confusion
 
-        confusion_metrix_dict = {}
-        for label_col in range(len(labels)):
-            confusion_matrix = confusion_matrix_with_labels[label_col]
-            confusion = {
-                "True Positive": int(confusion_matrix[1, 1]),
-                "False Negative": int(confusion_matrix[1, 0]),
+            # for label, matrix in confusion_metrix_dict.items():
+            #     print("Confusion matrix for label {}:".format(label))
+            #     print(matrix)
+
+            errors = {
+                'Class': classes.tolist(),
+                'Classification Report': classification_report,
+                'Confusion': confusion_metrix_dict
             }
-            confusion_metrix_dict[labels[label_col]] = confusion
+            metrics = {FITTED_ERRORS: errors}
 
-        # for label, matrix in confusion_metrix_dict.items():
-        #     print("Confusion matrix for label {}:".format(label))
-        #     print(matrix)
+            return metrics
+        else:
+            confusion_matrix = pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'])
+            confusion = {
+                "True Negative": int(confusion_matrix.iloc[0, 0]),
+                "False Positive": int(confusion_matrix.iloc[0, 1]),
+                "False Negative": int(confusion_matrix.iloc[1, 0]),
+                "True Positive": int(confusion_matrix.iloc[1, 1])
+            }
 
-        errors = {
-            'Class': labels.tolist(),
-            'Classification Report': classification_report,
-            'Confusion': confusion_metrix_dict
-        }
-        metrics = {FITTED_ERRORS: errors}
+            errors = {
+                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
+                'F1 Score': round(f1_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Recall': round(recall_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Precision': round(precision_score(y_true, y_pred), DECIMAL_PRECISION),
+                'ROC AUC': round(roc_auc_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Confusion': confusion
+            }
 
-        return metrics
+            metrics = {FITTED_ERRORS: errors}
+
+            return metrics
 
     def infer(self, df, options):
         model_file = options['model']
