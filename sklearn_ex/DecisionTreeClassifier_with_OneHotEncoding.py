@@ -155,6 +155,8 @@ if __name__ == '__main__':
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
+    error = output.loc[output['error'] == 1]
+    error.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error.csv', index=False)
     output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_training.csv', index=False)
 
     infer_data = raw_data.iloc[:, :]
