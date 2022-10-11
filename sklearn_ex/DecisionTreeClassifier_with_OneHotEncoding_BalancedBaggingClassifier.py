@@ -19,7 +19,6 @@ class DecisionTreeClassifier_with_OneHotEncoding_BalancedBaggingClassifier(Abstr
             strs=['splitter'],
             floats=['min_weight_fraction_leaf', 'min_impurity_decrease', 'ccp_alpha']
         )
-        # self.estimator = _DecisionTreeClassifier(**input_params)
         '''
             ref:
                 https://towardsdatascience.com/having-an-imbalanced-dataset-here-is-how-you-can-solve-it-1640568947eb
