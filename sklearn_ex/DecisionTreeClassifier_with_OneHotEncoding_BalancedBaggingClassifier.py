@@ -3,11 +3,10 @@ import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.tree import DecisionTreeClassifier as _DecisionTreeClassifier
 from sklearn_ex.AbstractAlgo import AbstractClassifier
 from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION
 from sklearn_ex.utils.param_utils import parse_params
-
+from sklearn.tree import DecisionTreeClassifier
 from imblearn.ensemble import BalancedBaggingClassifier
 
 class DecisionTreeClassifier_with_OneHotEncoding_BalancedBaggingClassifier(AbstractClassifier):
@@ -21,7 +20,12 @@ class DecisionTreeClassifier_with_OneHotEncoding_BalancedBaggingClassifier(Abstr
             floats=['min_weight_fraction_leaf', 'min_impurity_decrease', 'ccp_alpha']
         )
         # self.estimator = _DecisionTreeClassifier(**input_params)
-        self.estimator = BalancedBaggingClassifier(base_estimator=_DecisionTreeClassifier(**input_params),
+        '''
+            ref:
+                https://towardsdatascience.com/having-an-imbalanced-dataset-here-is-how-you-can-solve-it-1640568947eb
+            That way, you can train a classifier that will handle the imbalance without having to undersample or oversample manually before training.
+        '''
+        self.estimator = BalancedBaggingClassifier(base_estimator=DecisionTreeClassifier(),
                                         sampling_strategy='auto',
                                         replacement=False,
                                         random_state=0)
