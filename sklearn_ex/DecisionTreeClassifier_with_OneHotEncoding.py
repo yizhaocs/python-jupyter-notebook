@@ -69,7 +69,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/report1665086402032.csv')
+    raw_data = pd.read_csv('../Resources/report1665510710601.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
@@ -131,7 +131,8 @@ if __name__ == '__main__':
     incident_status = raw_data['Incident Status']
     incident_resolution = raw_data['Incident Resolution']
     raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
-    print(f'raw_data["Incident_Status_with_Incident_Resolution"].unique():{raw_data["Incident_Status_with_Incident_Resolution"].unique()}')
+    labels = raw_data["Incident_Status_with_Incident_Resolution"].unique()
+    print(f'labels:{labels}')
     ##############################################################################################################
     options = {
         'feature_attrs': [
@@ -155,20 +156,16 @@ if __name__ == '__main__':
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
-    '''
-        good and error for the lable is 11
-    '''
-    error_11 = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == '11')]
-    error_11.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error_11.csv', index=False)
-    good_11 = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == '11')]
-    good_11.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_good_11.csv', index=False)
-    '''
-        good and error for the lable is 31
-    '''
-    error_31 = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == '31')]
-    error_31.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error_31.csv', index=False)
-    good_31 = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == '31')]
-    good_31.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_good_31.csv', index=False)
+
+    for label_col in range(len(labels)):
+        label = labels[label_col]
+        '''
+            good and error for the lable is 11
+        '''
+        error = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
+        error.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error_' + label + '.csv', index=False)
+        good = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == label)]
+        good.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_good_' + label + '.csv', index=False)
 
 
     output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_training.csv', index=False)

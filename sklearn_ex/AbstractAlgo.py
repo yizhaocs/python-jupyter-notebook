@@ -83,28 +83,28 @@ class AbstractClassifier(AbstractAlgo):
 
     def evaluate(self, y_true, y_pred):
         # true if Multi-class Classification
-        classes = y_true.unique()
-        if len(classes) > 2:
+        labels = y_true.unique()
+        if len(labels) > 2:
             from sklearn.metrics import multilabel_confusion_matrix, classification_report
-            confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=classes)
-            classification_report = classification_report(y_true, y_pred, labels=classes, output_dict = True)
+            confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
+            classification_report = classification_report(y_true, y_pred, labels=labels, output_dict = True)
             # print(classification_report)
 
             confusion_metrix_dict = {}
-            for label_col in range(len(classes)):
+            for label_col in range(len(labels)):
                 confusion_matrix = confusion_matrix_with_labels[label_col]
                 confusion = {
                     "True Positive": int(confusion_matrix[1, 1]),
                     "False Negative": int(confusion_matrix[1, 0]),
                 }
-                confusion_metrix_dict[classes[label_col]] = confusion
+                confusion_metrix_dict[labels[label_col]] = confusion
 
             # for label, matrix in confusion_metrix_dict.items():
             #     print("Confusion matrix for label {}:".format(label))
             #     print(matrix)
 
             errors = {
-                'Class': classes.tolist(),
+                'Labels': labels.tolist(),
                 'Classification Report': classification_report,
                 'Confusion': confusion_metrix_dict
             }
