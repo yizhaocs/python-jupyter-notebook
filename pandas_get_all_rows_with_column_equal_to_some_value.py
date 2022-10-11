@@ -11,5 +11,14 @@ https://stackoverflow.com/questions/17071871/how-do-i-select-rows-from-a-datafra
 
 input_data = 'Resources/host_health.csv'
 df = pd.read_csv(input_data, lineterminator='\n')
-filter_result = df.loc[df['Host Name'] == 'ussvnplesx54.fortinet-us.com']
-print(filter_result)
+'''
+一个condition
+'''
+filter_result_single_condition = df.loc[df['Host Name'] == 'ussvnplesx54.fortinet-us.com']
+print(filter_result_single_condition)
+
+'''
+多个conditions
+'''
+filter_result_multiple_conditions = df.loc[(df['Host Name'] == 'ussvnplesx54.fortinet-us.com') & (df['AVG(CPU Util)'] > 59)]
+print(filter_result_multiple_conditions)
