@@ -155,8 +155,22 @@ if __name__ == '__main__':
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
-    error = output.loc[output['error'] == 1]
-    error.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error.csv', index=False)
+    '''
+        good and error for the lable is 11
+    '''
+    error_11 = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == '11')]
+    error_11.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error_11.csv', index=False)
+    good_11 = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == '11')]
+    good_11.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_good_11.csv', index=False)
+    '''
+        good and error for the lable is 31
+    '''
+    error_31 = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == '31')]
+    error_31.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error_31.csv', index=False)
+    good_31 = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == '31')]
+    good_31.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_good_31.csv', index=False)
+
+
     output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_training.csv', index=False)
 
     infer_data = raw_data.iloc[:, :]
