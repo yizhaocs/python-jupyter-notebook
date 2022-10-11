@@ -69,7 +69,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/report1665510710601.csv')
+    raw_data = pd.read_csv('../Resources/report1665512010542.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
@@ -156,6 +156,15 @@ if __name__ == '__main__':
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
+
+    manual_closed_incidents_rows = output.loc[(output['Incident ID'] == 9705)
+                                              | (output['Incident ID'] == 7782)
+                                              | (output['Incident ID'] == 9525)
+                                              | (output['Incident ID'] == 9461)
+                                              | (output['Incident ID'] == 7779)
+                                              | (output['Incident ID'] == 9090)
+                                              ]
+    manual_closed_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manual_closed_incidents_rows.csv', index=False)
 
     for label_col in range(len(labels)):
         label = labels[label_col]
