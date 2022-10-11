@@ -163,12 +163,12 @@ if __name__ == '__main__':
             good and error for the lable is 11
         '''
         error = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
-        error.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_error_' + label + '.csv', index=False)
+        error.to_csv('/Users/yzhao/Documents/ai_for_operational_management/true_positive_' + label + '.csv', index=False)
         good = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == label)]
-        good.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_good_' + label + '.csv', index=False)
+        good.to_csv('/Users/yzhao/Documents/ai_for_operational_management/false_negative_' + label + '.csv', index=False)
 
 
-    output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_training.csv', index=False)
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
@@ -176,4 +176,4 @@ if __name__ == '__main__':
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
-    output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_inference.csv', index=False)
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
