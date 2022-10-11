@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
                     techniqueid = s.partition(':')[2]
 
-                    list_of_char = ['\"', '}', '\]']
+                    list_of_char = ['\"', '}', '\]', ' ']
                     pattern = '[' + ''.join(list_of_char) + ']'
                     techniqueid = re.sub(pattern, '', techniqueid)
                     techniqueid_data.append(techniqueid)
