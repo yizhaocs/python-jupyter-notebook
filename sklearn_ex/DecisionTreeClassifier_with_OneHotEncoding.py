@@ -155,7 +155,7 @@ if __name__ == '__main__':
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
-    output.to_csv('/Users/yzhao/Downloads/test_3.csv', index=False)
+    output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_training.csv', index=False)
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
@@ -163,4 +163,4 @@ if __name__ == '__main__':
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
-    output.to_csv('/Users/yzhao/Downloads/test_4.csv', index=False)
+    output.to_csv('/Users/yzhao/Downloads/ai_for_operational_management_inference.csv', index=False)
