@@ -25,7 +25,7 @@ class DecisionTreeClassifier_with_OneHotEncoding_BalancedBaggingClassifier(Abstr
                 https://towardsdatascience.com/having-an-imbalanced-dataset-here-is-how-you-can-solve-it-1640568947eb
             That way, you can train a classifier that will handle the imbalance without having to undersample or oversample manually before training.
         '''
-        self.estimator = BalancedBaggingClassifier(base_estimator=DecisionTreeClassifier(),
+        self.estimator = BalancedBaggingClassifier(base_estimator=DecisionTreeClassifier(**input_params),
                                         sampling_strategy='auto',
                                         replacement=False,
                                         random_state=0)
