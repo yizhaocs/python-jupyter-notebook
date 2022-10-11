@@ -94,8 +94,10 @@ class AbstractClassifier(AbstractAlgo):
             for label_col in range(len(labels)):
                 confusion_matrix = confusion_matrix_with_labels[label_col]
                 confusion = {
-                    "True Positive": int(confusion_matrix[1, 1]),
+                    "True Negative": int(confusion_matrix[0, 0]),
+                    "False Positive": int(confusion_matrix[0, 1]),
                     "False Negative": int(confusion_matrix[1, 0]),
+                    "True Positive": int(confusion_matrix[1, 1])
                 }
                 confusion_metrix_dict[labels[label_col]] = confusion
 
