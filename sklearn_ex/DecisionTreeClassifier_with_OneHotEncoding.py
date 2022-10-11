@@ -69,7 +69,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/report1665512010542.csv')
+    raw_data = pd.read_csv('../Resources/report1665512454703.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
@@ -157,12 +157,19 @@ if __name__ == '__main__':
     print(output)
     print(json.dumps(metrics, indent=2))
 
-    manual_closed_incidents_rows = output.loc[(output['Incident ID'] == 9705)
+    manual_closed_incidents_rows = output.loc[(
+                                                      # False Positive
+                                                      output['Incident ID'] == 9705)
                                               | (output['Incident ID'] == 7782)
                                               | (output['Incident ID'] == 9525)
+                                              | (output['Incident ID'] == 9738)
+                                              | (output['Incident ID'] == 7780)
+                                                #True Positive
                                               | (output['Incident ID'] == 9461)
                                               | (output['Incident ID'] == 7779)
                                               | (output['Incident ID'] == 9090)
+                                              | (output['Incident ID'] == 9740)
+                                              | (output['Incident ID'] == 9143)
                                               ]
     manual_closed_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manual_closed_incidents_rows.csv', index=False)
 
