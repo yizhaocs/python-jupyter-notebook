@@ -178,9 +178,9 @@ if __name__ == '__main__':
         '''
             good and error for the lable is 11
         '''
-        error = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
+        error = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == label)]
         error.to_csv('/Users/yzhao/Documents/ai_for_operational_management/true_positive_' + label + '.csv', index=False)
-        good = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == label)]
+        good = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
         good.to_csv('/Users/yzhao/Documents/ai_for_operational_management/false_negative_' + label + '.csv', index=False)
 
 
