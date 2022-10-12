@@ -166,21 +166,21 @@ if __name__ == '__main__':
     print(output)
     print(json.dumps(metrics, indent=2))
 
-    manual_closed_incidents_rows = output.loc[(
+    manually_cleared_incidents_rows = output.loc[(
                                                       # False Positive
                                                       output['Incident ID'] == 9705)
-                                              | (output['Incident ID'] == 7782)
-                                              | (output['Incident ID'] == 9525)
-                                              | (output['Incident ID'] == 9738)
-                                              | (output['Incident ID'] == 7780)
-                                                #True Positive
-                                              | (output['Incident ID'] == 9461)
-                                              | (output['Incident ID'] == 7779)
-                                              | (output['Incident ID'] == 9090)
-                                              | (output['Incident ID'] == 9740)
-                                              | (output['Incident ID'] == 9143)
-                                              ]
-    manual_closed_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manual_closed_incidents_rows.csv', index=False)
+                                                 | (output['Incident ID'] == 7782)
+                                                 | (output['Incident ID'] == 9525)
+                                                 | (output['Incident ID'] == 9738)
+                                                 | (output['Incident ID'] == 7780)
+                                                 #True Positive
+                                                 | (output['Incident ID'] == 9461)
+                                                 | (output['Incident ID'] == 7779)
+                                                 | (output['Incident ID'] == 9090)
+                                                 | (output['Incident ID'] == 9740)
+                                                 | (output['Incident ID'] == 9143)
+                                                 ]
+    manually_cleared_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manually_cleared_incidents_rows.csv', index=False)
 
     for label_col in range(len(labels)):
         label = labels[label_col]
