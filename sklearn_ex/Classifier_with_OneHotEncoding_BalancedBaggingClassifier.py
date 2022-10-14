@@ -92,7 +92,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/report1665512454703.csv')
+    raw_data = pd.read_csv('../Resources/fortinet_reports/report1665512454703.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)

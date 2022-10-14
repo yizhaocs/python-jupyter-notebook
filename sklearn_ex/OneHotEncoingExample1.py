@@ -5,7 +5,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 
-df = pd.read_csv("../Resources/report1664845422878.csv")
+df = pd.read_csv("../Resources/fortinet_reports/report1664845422878.csv")
 print(f'df.head():{df.head()}')
 print(f'df.tail():{df.tail()}')
 print(f'df.dtypes:{df.dtypes}')
