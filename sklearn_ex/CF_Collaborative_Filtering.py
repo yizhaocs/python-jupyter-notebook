@@ -61,6 +61,7 @@ class CF_Collaborative_Filtering(AbstractClassifier):
         print(f'indices:{indices}')
 
         # convert user_name to user_index
+        print(f'df.columns.tolist():{df.columns.tolist()}')
         user_index = df.columns.tolist().index('User')
         print(f'user_index:{user_index}')
 
