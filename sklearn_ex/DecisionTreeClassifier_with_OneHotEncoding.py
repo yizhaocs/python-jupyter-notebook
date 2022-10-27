@@ -69,7 +69,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/fortinet_reports/report1665512454703.csv')
+    raw_data = pd.read_csv('../Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
@@ -139,6 +139,7 @@ if __name__ == '__main__':
             'Event Name',
             'Host IP',
             'Host Name',
+            'Incident Title',
             'Incident Source',
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
