@@ -65,8 +65,9 @@ class Classifier_with_text_processing(AbstractClassifier):
         # Build Features
         Xfeatures = tfidf.fit_transform(corpus).toarray()
         df_tfidfvect = pd.DataFrame(data=Xfeatures, columns=tfidf.get_feature_names())
-        df.drop('Incident Title', axis=1)
+        df = df.drop('Incident Title', axis=1)
         df = pd.concat([df, df_tfidfvect], axis=1)
+        return df
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
@@ -187,6 +188,7 @@ if __name__ == '__main__':
             'Event Name',
             'Host IP',
             'Host Name',
+            'Incident Title',
             'Incident Source',
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
