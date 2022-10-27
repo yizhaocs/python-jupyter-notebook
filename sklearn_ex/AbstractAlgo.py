@@ -81,10 +81,31 @@ class AbstractClassifier(AbstractAlgo):
     def __init__(self):
         self.ss_feature = StandardScaler()
 
-    def evaluate(self, y_true, y_pred):
-        # true if Multi-class Classification
-        labels = y_true.unique()
-        if len(labels) > 2:
+    def evaluate(self, y_true, y_pred, options = None):
+        if options is not None and options['algorithm'] == 'multilabel': # true if Multi-label Classification
+            confusion_matrix = pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'])
+            confusion = {
+                "True Negative": int(confusion_matrix.iloc[0, 0]),
+                "False Positive": int(confusion_matrix.iloc[0, 1]),
+                "False Negative": int(confusion_matrix.iloc[1, 0]),
+                "True Positive": int(confusion_matrix.iloc[1, 1])
+            }
+
+            errors = {
+                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
+                'F1 Score': round(f1_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Recall': round(recall_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Precision': round(precision_score(y_true, y_pred), DECIMAL_PRECISION),
+                'ROC AUC': round(roc_auc_score(y_true, y_pred), DECIMAL_PRECISION),
+                'Confusion': confusion
+            }
+
+            metrics = {FITTED_ERRORS: errors}
+
+            return metrics
+
+        if len(y_true.unique()) > 2: # true if Multi-class Classification
+            labels = y_true.unique()
             from sklearn.metrics import multilabel_confusion_matrix, classification_report
             confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
             classification_report = classification_report(y_true, y_pred, labels=labels, output_dict = True)

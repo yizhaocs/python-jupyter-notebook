@@ -2,7 +2,7 @@ import pickle
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from skmultilearn.problem_transform import BinaryRelevance
 
@@ -50,8 +50,8 @@ class Classifier_with_text_processing(AbstractClassifier):
                                                        sampling_strategy='auto',
                                                        replacement=False,
                                                        random_state=0)
-        elif algorithm == 'MultinomialNB':
-            self.estimator = BinaryRelevance(MultinomialNB())
+        elif algorithm == 'multilabel':
+            self.estimator = BinaryRelevance(GaussianNB())
 
     def text_preprocessing(self, df):
         import neattext as nt
@@ -110,7 +110,9 @@ class Classifier_with_text_processing(AbstractClassifier):
                 pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
-        metrics = self.evaluate(target_data, y_pred)
+        metrics = None
+        if not is_text_preprocessing:
+            metrics = self.evaluate(target_data, y_pred, options)
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
         # metrics[FITTED_PARAMS] = fitted_parameter
@@ -118,7 +120,9 @@ class Classifier_with_text_processing(AbstractClassifier):
         # 5. Handle the return value
         predict_name = f"{PRIDCT_NAME}({target_attr})"
         output = pd.concat([df, pd.DataFrame(y_pred, columns=[predict_name])], axis=1).reset_index(drop=True)
-        output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
+
+        if not is_text_preprocessing:
+            output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
 
         return self.estimator, output, metrics
 
@@ -191,11 +195,11 @@ if __name__ == '__main__':
     incident_status = raw_data['Incident Status']
     incident_resolution = raw_data['Incident Resolution']
     raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
-    labels = raw_data["Incident_Status_with_Incident_Resolution"].unique()
-    print(f'labels:{labels}')
+
+
     ##############################################################################################################
     options = {
-        'algorithm': 'MultinomialNB',
+        'algorithm': 'multilabel',
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -216,8 +220,14 @@ if __name__ == '__main__':
     }
 
     is_text_preprocessing = False
-    if options['algorithm'] == 'MultinomialNB':
+    if options['algorithm'] == 'multilabel':
         is_text_preprocessing = True
+
+
+    ##############################################################################################################
+    if not is_text_preprocessing:
+        labels = raw_data["Incident_Status_with_Incident_Resolution"].unique()
+        print(f'labels:{labels}')
 
     decisiontree_classification = Classifier_with_text_processing(options)
     model, output, metrics = decisiontree_classification.train(raw_data, options, is_text_preprocessing)
@@ -240,15 +250,16 @@ if __name__ == '__main__':
     #                                              ]
     # manually_cleared_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manually_cleared_incidents_rows.csv', index=False)
 
-    for label_col in range(len(labels)):
-        label = labels[label_col]
-        '''
-            good and error for the lable is 11
-        '''
-        error = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == label)]
-        error.to_csv('/Users/yzhao/Documents/ai_for_operational_management/true_positive_' + label + '.csv', index=False)
-        good = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
-        good.to_csv('/Users/yzhao/Documents/ai_for_operational_management/false_negative_' + label + '.csv', index=False)
+    if not is_text_preprocessing:
+        for label_col in range(len(labels)):
+            label = labels[label_col]
+            '''
+                good and error for the lable is 11
+            '''
+            error = output.loc[(output['error'] == 0) & (output['Incident_Status_with_Incident_Resolution'] == label)]
+            error.to_csv('/Users/yzhao/Documents/ai_for_operational_management/true_positive_' + label + '.csv', index=False)
+            good = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
+            good.to_csv('/Users/yzhao/Documents/ai_for_operational_management/false_negative_' + label + '.csv', index=False)
 
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
 
