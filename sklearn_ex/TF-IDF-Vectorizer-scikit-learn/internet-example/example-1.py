@@ -27,5 +27,8 @@ df_countvect = pd.DataFrame(data=count_wm.toarray(), index=['Doc1', 'Doc2'], col
 df_tfidfvect = pd.DataFrame(data=tfidf_wm.toarray(), index=['Doc1', 'Doc2'], columns=tfidf_tokens)
 print("Count Vectorizer\n")
 print(df_countvect)
-print("\nTD-IDF Vectorizer\n")
+print("\nTD-IDF Vectorizer with index\n")
 print(df_tfidfvect)
+
+print("\nTD-IDF Vectorizer without index\n")
+print(pd.DataFrame(data=tfidf_wm.toarray(), columns=tfidf_tokens))
