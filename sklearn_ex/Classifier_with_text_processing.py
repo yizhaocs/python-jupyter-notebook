@@ -10,6 +10,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier as _RandomForestClassifier
 from imblearn.ensemble import BalancedBaggingClassifier
 
+
 class Classifier_with_text_processing(AbstractClassifier):
 
     def __init__(self, options):
@@ -29,9 +30,9 @@ class Classifier_with_text_processing(AbstractClassifier):
                 That way, you can train a classifier that will handle the imbalance without having to undersample or oversample manually before training.
             '''
             self.estimator = BalancedBaggingClassifier(base_estimator=DecisionTreeClassifier(**input_params),
-                                            sampling_strategy='auto',
-                                            replacement=False,
-                                            random_state=0)
+                                                       sampling_strategy='auto',
+                                                       replacement=False,
+                                                       random_state=0)
         elif algorithm == 'RandomForestClassifier':
             input_params = parse_params(
                 options.get('algo_params', {}),
@@ -40,14 +41,37 @@ class Classifier_with_text_processing(AbstractClassifier):
                 floats=['min_weight_fraction_leaf', 'min_impurity_decrease', 'ccp_alpha']
             )
             self.estimator = BalancedBaggingClassifier(base_estimator=_RandomForestClassifier(**input_params),
-                                            sampling_strategy='auto',
-                                            replacement=False,
-                                            random_state=0)
+                                                       sampling_strategy='auto',
+                                                       replacement=False,
+                                                       random_state=0)
+
+    def text_preprocessing(self, df):
+        import neattext as nt
+        import neattext.functions as nfx
+
+        # Explore For Noise
+        df['Incident Title'].apply(lambda x: nt.TextFrame(x).noise_scan())
+
+        # Explore For Noise
+        df['Incident Title'].apply(lambda x: nt.TextExtractor(x).extract_stopwords())
+
+        # Explore For Noise
+        df['Incident Title'].apply(nfx.remove_stopwords)
+
+        corpus = df['Incident Title'].apply(nfx.remove_stopwords)
+
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
+        # Build Features
+        Xfeatures = tfidf.fit_transform(corpus).toarray()
+        df_tfidfvect = pd.DataFrame(data=Xfeatures, columns=tfidf.get_feature_names())
+        df.drop('Incident Title', axis=1)
+        df = pd.concat([df, df_tfidfvect], axis=1)
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        feature_data = df[feature_attrs]
+        feature_data = self.text_preprocessing(df[feature_attrs])
         target_data = df[target_attr]
 
         ####################################################################################################
@@ -92,7 +116,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/fortinet_reports/report1665512454703.csv')
+    raw_data = pd.read_csv('../Resources/fortinet_reports/report1666743279291_with_incident_title.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
@@ -182,13 +206,13 @@ if __name__ == '__main__':
     print(json.dumps(metrics, indent=2))
 
     manually_cleared_incidents_rows = output.loc[(
-                                                      # False Positive
-                                                      output['Incident ID'] == 9705)
+                                                     # False Positive
+                                                         output['Incident ID'] == 9705)
                                                  | (output['Incident ID'] == 7782)
                                                  | (output['Incident ID'] == 9525)
                                                  | (output['Incident ID'] == 9738)
                                                  | (output['Incident ID'] == 7780)
-                                                 #True Positive
+                                                 # True Positive
                                                  | (output['Incident ID'] == 9461)
                                                  | (output['Incident ID'] == 7779)
                                                  | (output['Incident ID'] == 9090)
@@ -206,7 +230,6 @@ if __name__ == '__main__':
         error.to_csv('/Users/yzhao/Documents/ai_for_operational_management/true_positive_' + label + '.csv', index=False)
         good = output.loc[(output['error'] == 1) & (output['Incident_Status_with_Incident_Resolution'] == label)]
         good.to_csv('/Users/yzhao/Documents/ai_for_operational_management/false_negative_' + label + '.csv', index=False)
-
 
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
 
