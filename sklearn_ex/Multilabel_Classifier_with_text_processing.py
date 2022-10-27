@@ -2,7 +2,10 @@ import pickle
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from skmultilearn.problem_transform import BinaryRelevance
+
 from sklearn_ex.AbstractAlgo import AbstractClassifier
 from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION
 from sklearn_ex.utils.param_utils import parse_params
@@ -29,10 +32,13 @@ class Classifier_with_text_processing(AbstractClassifier):
                     https://towardsdatascience.com/having-an-imbalanced-dataset-here-is-how-you-can-solve-it-1640568947eb
                 That way, you can train a classifier that will handle the imbalance without having to undersample or oversample manually before training.
             '''
+
             self.estimator = BalancedBaggingClassifier(base_estimator=DecisionTreeClassifier(**input_params),
                                                        sampling_strategy='auto',
                                                        replacement=False,
                                                        random_state=0)
+
+
         elif algorithm == 'RandomForestClassifier':
             input_params = parse_params(
                 options.get('algo_params', {}),
@@ -44,6 +50,8 @@ class Classifier_with_text_processing(AbstractClassifier):
                                                        sampling_strategy='auto',
                                                        replacement=False,
                                                        random_state=0)
+        elif algorithm == 'MultinomialNB':
+            self.estimator = BinaryRelevance(MultinomialNB())
 
     def text_preprocessing(self, df):
         import neattext as nt
@@ -187,7 +195,7 @@ if __name__ == '__main__':
     print(f'labels:{labels}')
     ##############################################################################################################
     options = {
-        'algorithm': 'RandomForestClassifier',
+        'algorithm': 'MultinomialNB',
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -206,8 +214,12 @@ if __name__ == '__main__':
         'target_attr': ['user_A', 'user_B', 'user_C', 'user_D'],
         'train_factor': 0.7
     }
+
+    is_text_preprocessing = False
+    if options['algorithm'] == 'MultinomialNB':
+        is_text_preprocessing = True
+
     decisiontree_classification = Classifier_with_text_processing(options)
-    is_text_preprocessing = True
     model, output, metrics = decisiontree_classification.train(raw_data, options, is_text_preprocessing)
     print(output)
     print(json.dumps(metrics, indent=2))
