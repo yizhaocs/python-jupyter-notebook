@@ -203,7 +203,7 @@ if __name__ == '__main__':
             'techniqueid'
         ],
         # 'target_attr': 'Incident Status',
-        'target_attr': 'Incident_Status_with_Incident_Resolution',
+        'target_attr': ['user_A', 'user_B', 'user_C', 'user_D'],
         'train_factor': 0.7
     }
     decisiontree_classification = Classifier_with_text_processing(options)
