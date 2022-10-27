@@ -117,7 +117,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../Resources/fortinet_reports/report1666743279291_with_incident_title.csv')
+    raw_data = pd.read_csv('../Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
@@ -207,21 +207,21 @@ if __name__ == '__main__':
     print(output)
     print(json.dumps(metrics, indent=2))
 
-    manually_cleared_incidents_rows = output.loc[(
-                                                     # False Positive
-                                                         output['Incident ID'] == 9705)
-                                                 | (output['Incident ID'] == 7782)
-                                                 | (output['Incident ID'] == 9525)
-                                                 | (output['Incident ID'] == 9738)
-                                                 | (output['Incident ID'] == 7780)
-                                                 # True Positive
-                                                 | (output['Incident ID'] == 9461)
-                                                 | (output['Incident ID'] == 7779)
-                                                 | (output['Incident ID'] == 9090)
-                                                 | (output['Incident ID'] == 9740)
-                                                 | (output['Incident ID'] == 9143)
-                                                 ]
-    manually_cleared_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manually_cleared_incidents_rows.csv', index=False)
+    # manually_cleared_incidents_rows = output.loc[(
+    #                                                  # False Positive
+    #                                                      output['Incident ID'] == 9705)
+    #                                              | (output['Incident ID'] == 7782)
+    #                                              | (output['Incident ID'] == 9525)
+    #                                              | (output['Incident ID'] == 9738)
+    #                                              | (output['Incident ID'] == 7780)
+    #                                              # True Positive
+    #                                              | (output['Incident ID'] == 9461)
+    #                                              | (output['Incident ID'] == 7779)
+    #                                              | (output['Incident ID'] == 9090)
+    #                                              | (output['Incident ID'] == 9740)
+    #                                              | (output['Incident ID'] == 9143)
+    #                                              ]
+    # manually_cleared_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manually_cleared_incidents_rows.csv', index=False)
 
     for label_col in range(len(labels)):
         label = labels[label_col]
