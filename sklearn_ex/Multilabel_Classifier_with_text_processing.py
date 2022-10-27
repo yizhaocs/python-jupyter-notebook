@@ -110,6 +110,10 @@ class Classifier_with_text_processing(AbstractClassifier):
                 pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
+
+        y_pred.to_csv('/Users/yzhao/Documents/ai_for_operational_management/y_pred.csv', index=False)
+
+
         metrics = None
         if not is_text_preprocessing:
             metrics = self.evaluate(target_data, y_pred, options)
