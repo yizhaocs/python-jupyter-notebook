@@ -69,10 +69,14 @@ class Classifier_with_text_processing(AbstractClassifier):
         df = pd.concat([df, df_tfidfvect], axis=1)
         return df
 
-    def train(self, df, options):
+    def train(self, df, options, is_text_preprocessing):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        feature_data = self.text_preprocessing(df[feature_attrs])
+        if is_text_preprocessing:
+            feature_data = self.text_preprocessing(df[feature_attrs])
+        else:
+            feature_data = df[feature_attrs]
+
         target_data = df[target_attr]
 
         ####################################################################################################
@@ -203,7 +207,8 @@ if __name__ == '__main__':
         'train_factor': 0.7
     }
     decisiontree_classification = Classifier_with_text_processing(options)
-    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    is_text_preprocessing = True
+    model, output, metrics = decisiontree_classification.train(raw_data, options, is_text_preprocessing)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -238,7 +243,7 @@ if __name__ == '__main__':
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
     options.update({'model': {MODEL_TYPE_SINGLE: model}})
-    output = decisiontree_classification.infer(infer_data, options)
+    output = decisiontree_classification.infer(infer_data, options, is_text_preprocessing)
     print(output)
 
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)

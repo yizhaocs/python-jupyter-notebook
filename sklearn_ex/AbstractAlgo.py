@@ -135,11 +135,16 @@ class AbstractClassifier(AbstractAlgo):
 
             return metrics
 
-    def infer(self, df, options):
+    def infer(self, df, options, is_text_preprocessing):
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
         feature_attrs = options['feature_attrs']
-        feature_data = df[feature_attrs]
+
+        if is_text_preprocessing:
+            feature_data = self.text_preprocessing(df[feature_attrs])
+        else:
+            feature_data = df[feature_attrs]
+
         ohe = OneHotEncoder()
         feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()
         ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
