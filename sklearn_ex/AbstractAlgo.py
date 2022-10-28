@@ -90,7 +90,10 @@ class AbstractClassifier(AbstractAlgo):
             # The Lower the result the better
             ham = hamming_loss(y_true, y_pred)
 
-            metrics = {"accuracy:": acc, "hamming_score": ham}
+            from sklearn.metrics import multilabel_confusion_matrix
+            confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)
+
+            metrics = {"accuracy:": acc, "hamming_score": ham, "confusion_matrix": confusion_matrix}
             print(f'metrics:{metrics}')
             return metrics
         elif len(y_true.unique()) > 2: # true if Multi-class Classification
