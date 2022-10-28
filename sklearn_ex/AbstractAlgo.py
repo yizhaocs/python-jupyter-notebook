@@ -92,8 +92,19 @@ class AbstractClassifier(AbstractAlgo):
 
             from sklearn.metrics import multilabel_confusion_matrix
             confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)
+            columns = y_true.columns
+            confusion_metrix_dict = {}
+            for index in range(len(confusion_matrix)):
+                single_confusion = confusion_matrix[index]
+                confusion = {
+                    "True Negative": int(single_confusion[0, 0]),
+                    "False Positive": int(single_confusion[0, 1]),
+                    "False Negative": int(single_confusion[1, 0]),
+                    "True Positive": int(single_confusion[1, 1])
+                }
+                confusion_metrix_dict[columns[index]] = confusion
 
-            metrics = {"accuracy:": acc, "hamming_score": ham, "confusion_matrix": confusion_matrix}
+            metrics = {"accuracy:": acc, "hamming_score": ham, "confusion_matrix": confusion_metrix_dict}
             print(f'metrics:{metrics}')
             return metrics
         elif len(y_true.unique()) > 2: # true if Multi-class Classification
@@ -170,7 +181,12 @@ class AbstractClassifier(AbstractAlgo):
             output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
             output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
         else:
+            columns = options['target_attr']
+            predict_columns = []
+            for index in range(len(columns)):
+                predict_columns.append(columns[index] + '_predicted')
+
             y_pred = y_pred.toarray()
-            output = pd.concat([df, pd.DataFrame(y_pred, columns=['p_1', 'p_2', 'p_3', 'p_4'])], axis=1).reset_index(drop=True)
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
 
         return output
