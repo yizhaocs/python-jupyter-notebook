@@ -51,6 +51,15 @@ class Classifier_with_text_processing(AbstractClassifier):
                                                        replacement=False,
                                                        random_state=0)
         elif algorithm == 'multilabel':
+            '''
+                According to my understanding of NB algorithm:
+
+                    1.Gaussian NB: It should be used for features in decimal form. GNB assumes features to follow a normal distribution.
+                    
+                    2.MultiNomial NB: It should be used for the features with discrete values like word count 1,2,3...
+                    
+                    3.Bernoulli NB: It should be used for features with binary or boolean values like True/False or 0/1.
+            '''
             self.estimator = BinaryRelevance(GaussianNB())
 
     def text_preprocessing(self, df):
