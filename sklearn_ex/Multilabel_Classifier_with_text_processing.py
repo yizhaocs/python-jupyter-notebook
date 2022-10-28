@@ -86,10 +86,10 @@ class Classifier_with_text_processing(AbstractClassifier):
         df = pd.concat([df, df_tfidfvect], axis=1)
         return df
 
-    def train(self, df, options, is_text_preprocessing):
+    def train(self, df, options):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        if is_text_preprocessing:
+        if options['algorithm'] == 'multilabel':
             feature_data = self.text_preprocessing(df[feature_attrs])
         else:
             feature_data = df[feature_attrs]
@@ -121,7 +121,7 @@ class Classifier_with_text_processing(AbstractClassifier):
             ], axis=0))
         # Convert to Array  To See Result
 
-        if  is_text_preprocessing:
+        if options['algorithm'] == 'multilabel':
             y_pred = y_pred.toarray()
             # y_pred.to_csv('/Users/yzhao/Documents/ai_for_operational_management/y_pred.csv', index=False)
 
@@ -138,7 +138,7 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         # 5. Handle the return value
 
-        if not is_text_preprocessing:
+        if not options['algorithm'] == 'multilabel':
             predict_name = f"{PRIDCT_NAME}({target_attr})"
             output = pd.concat([df, pd.DataFrame(y_pred, columns=[predict_name])], axis=1).reset_index(drop=True)
             output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
@@ -244,18 +244,15 @@ if __name__ == '__main__':
         'train_factor': 0.7
     }
 
-    is_text_preprocessing = False
-    if options['algorithm'] == 'multilabel':
-        is_text_preprocessing = True
 
 
     ##############################################################################################################
-    if not is_text_preprocessing:
+    if not options['algorithm'] == 'multilabel':
         labels = raw_data["Incident_Status_with_Incident_Resolution"].unique()
         print(f'labels:{labels}')
 
     decisiontree_classification = Classifier_with_text_processing(options)
-    model, output, metrics = decisiontree_classification.train(raw_data, options, is_text_preprocessing)
+    model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -275,7 +272,7 @@ if __name__ == '__main__':
     #                                              ]
     # manually_cleared_incidents_rows.to_csv('/Users/yzhao/Documents/ai_for_operational_management/manually_cleared_incidents_rows.csv', index=False)
 
-    if not is_text_preprocessing:
+    if not options['algorithm'] == 'multilabel':
         for label_col in range(len(labels)):
             label = labels[label_col]
             '''
@@ -291,7 +288,7 @@ if __name__ == '__main__':
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
     options.update({'model': {MODEL_TYPE_SINGLE: model}})
-    output = decisiontree_classification.infer(infer_data, options, is_text_preprocessing)
+    output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)

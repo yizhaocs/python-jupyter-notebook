@@ -159,12 +159,12 @@ class AbstractClassifier(AbstractAlgo):
 
             return metrics
 
-    def infer(self, df, options, is_text_preprocessing):
+    def infer(self, df, options):
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
         feature_attrs = options['feature_attrs']
 
-        if is_text_preprocessing:
+        if options['algorithm'] == 'multilabel':
             feature_data = self.text_preprocessing(df[feature_attrs])
         else:
             feature_data = df[feature_attrs]
@@ -176,7 +176,7 @@ class AbstractClassifier(AbstractAlgo):
         target_attr = options['target_attr']
         # output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
 
-        if not is_text_preprocessing:
+        if not options['algorithm'] == 'multilabel':
             predict_name = f"{PRIDCT_NAME}({target_attr})"
             output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
             output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
