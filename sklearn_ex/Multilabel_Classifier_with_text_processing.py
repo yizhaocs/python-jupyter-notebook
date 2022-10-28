@@ -118,8 +118,11 @@ class Classifier_with_text_processing(AbstractClassifier):
 
 
         metrics = None
-        if not is_text_preprocessing:
+        if options is not None and options['algorithm'] == 'multilabel':
             metrics = self.evaluate(target_data, y_pred, options)
+        else:
+            metrics = self.evaluate(target_data, y_pred, None)
+
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
         # metrics[FITTED_PARAMS] = fitted_parameter

@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, \
-    recall_score, precision_score, roc_auc_score
+    recall_score, precision_score, roc_auc_score, hamming_loss
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn_ex.utils.const_utils import *
 from sklearn_ex.utils.excp_utils import phMLNotImplError
@@ -83,28 +83,17 @@ class AbstractClassifier(AbstractAlgo):
 
     def evaluate(self, y_true, y_pred, options = None):
         if options is not None and options['algorithm'] == 'multilabel': # true if Multi-label Classification
-            confusion_matrix = pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'])
-            confusion = {
-                "True Negative": int(confusion_matrix.iloc[0, 0]),
-                "False Positive": int(confusion_matrix.iloc[0, 1]),
-                "False Negative": int(confusion_matrix.iloc[1, 0]),
-                "True Positive": int(confusion_matrix.iloc[1, 1])
-            }
+            # Accuracy
+            acc = accuracy_score(y_true, y_pred)
 
-            errors = {
-                'Accuracy': round(accuracy_score(y_true, y_pred), DECIMAL_PRECISION),
-                'F1 Score': round(f1_score(y_true, y_pred), DECIMAL_PRECISION),
-                'Recall': round(recall_score(y_true, y_pred), DECIMAL_PRECISION),
-                'Precision': round(precision_score(y_true, y_pred), DECIMAL_PRECISION),
-                'ROC AUC': round(roc_auc_score(y_true, y_pred), DECIMAL_PRECISION),
-                'Confusion': confusion
-            }
+            # Hamming Loss :Incorrect Predictions
+            # The Lower the result the better
+            ham = hamming_loss(y_true, y_pred)
 
-            metrics = {FITTED_ERRORS: errors}
-
+            metrics = {"accuracy:": acc, "hamming_score": ham}
+            print(f'metrics:{metrics}')
             return metrics
-
-        if len(y_true.unique()) > 2: # true if Multi-class Classification
+        elif len(y_true.unique()) > 2: # true if Multi-class Classification
             labels = y_true.unique()
             from sklearn.metrics import multilabel_confusion_matrix, classification_report
             confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
