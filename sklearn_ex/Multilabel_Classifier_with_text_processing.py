@@ -134,7 +134,11 @@ class Classifier_with_text_processing(AbstractClassifier):
             output = pd.concat([df, pd.DataFrame(y_pred, columns=[predict_name])], axis=1).reset_index(drop=True)
             output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
         else:
-            output = pd.concat([df, pd.DataFrame(y_pred, columns=['p_1', 'p_2', 'p_3', 'p_4'])], axis=1).reset_index(drop=True)
+            columns = options['target_attr']
+            predict_columns = []
+            for index in range(len(columns)):
+                predict_columns.append(columns[index] + '_predicted')
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
 
         return self.estimator, output, metrics
 
