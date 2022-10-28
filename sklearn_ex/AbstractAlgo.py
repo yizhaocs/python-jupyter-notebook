@@ -171,5 +171,14 @@ class AbstractClassifier(AbstractAlgo):
         ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
         y_pred = model.predict(ss_feature_data)
         target_attr = options['target_attr']
-        output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
+        # output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
+
+        if not is_text_preprocessing:
+            predict_name = f"{PRIDCT_NAME}({target_attr})"
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
+            output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
+        else:
+            y_pred = y_pred.toarray()
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=['p_1', 'p_2', 'p_3', 'p_4'])], axis=1).reset_index(drop=True)
+
         return output

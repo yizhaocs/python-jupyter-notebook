@@ -110,8 +110,11 @@ class Classifier_with_text_processing(AbstractClassifier):
                 pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
+        # Convert to Array  To See Result
 
-        y_pred.to_csv('/Users/yzhao/Documents/ai_for_operational_management/y_pred.csv', index=False)
+        if  is_text_preprocessing:
+            y_pred = y_pred.toarray()
+            # y_pred.to_csv('/Users/yzhao/Documents/ai_for_operational_management/y_pred.csv', index=False)
 
 
         metrics = None
@@ -122,11 +125,13 @@ class Classifier_with_text_processing(AbstractClassifier):
         # metrics[FITTED_PARAMS] = fitted_parameter
 
         # 5. Handle the return value
-        predict_name = f"{PRIDCT_NAME}({target_attr})"
-        output = pd.concat([df, pd.DataFrame(y_pred, columns=[predict_name])], axis=1).reset_index(drop=True)
 
         if not is_text_preprocessing:
+            predict_name = f"{PRIDCT_NAME}({target_attr})"
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=[predict_name])], axis=1).reset_index(drop=True)
             output[DIFF_NAME] = output.apply(lambda x: 0 if x[target_attr] == x[predict_name] else 1, axis=1)
+        else:
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=['p_1', 'p_2', 'p_3', 'p_4'])], axis=1).reset_index(drop=True)
 
         return self.estimator, output, metrics
 
