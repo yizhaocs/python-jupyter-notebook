@@ -2,8 +2,9 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, \
     recall_score, precision_score, roc_auc_score, hamming_loss
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn_ex.utils.const_utils import *
-from sklearn_ex.utils.excp_utils import phMLNotImplError
+
+from sklearn_ex.Multilabel_Classifier_with_text_processing.utils.const_utils import MODEL_TYPE_SINGLE
+from sklearn_ex.Multilabel_Classifier_with_text_processing.utils.excp_utils import phMLNotImplError
 
 
 class AbstractAlgo(object):

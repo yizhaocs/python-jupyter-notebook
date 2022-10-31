@@ -1,17 +1,14 @@
 import pickle
 
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from skmultilearn.problem_transform import BinaryRelevance
 
-from sklearn_ex.AbstractAlgo import AbstractClassifier
+from sklearn_ex.Multilabel_Classifier_with_text_processing.AbstractAlgo import AbstractClassifier
 from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION
-from sklearn_ex.utils.param_utils import parse_params
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier as _RandomForestClassifier
-from imblearn.ensemble import BalancedBaggingClassifier
 
 
 class Classifier_with_text_processing(AbstractClassifier):
@@ -21,16 +18,20 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         algorithm = options['algorithm']
 
-        '''
-            According to my understanding of NB algorithm:
-
-                1.Gaussian NB: It should be used for features in decimal form. GNB assumes features to follow a normal distribution.
-                
-                2.MultiNomial NB: It should be used for the features with discrete values like word count 1,2,3...
-                
-                3.Bernoulli NB: It should be used for features with binary or boolean values like True/False or 0/1.
-        '''
-        self.estimator = BinaryRelevance(GaussianNB())
+        if algorithm == 'BinaryRelevance':
+            '''
+                According to my understanding of NB algorithm:
+    
+                    1.Gaussian NB: It should be used for features in decimal form. GNB assumes features to follow a normal distribution.
+                    
+                    2.MultiNomial NB: It should be used for the features with discrete values like word count 1,2,3...
+                    
+                    3.Bernoulli NB: It should be used for features with binary or boolean values like True/False or 0/1.
+            '''
+            self.estimator = BinaryRelevance(GaussianNB())
+        else:
+            self.estimator = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini', n_estimators = 1000,
+                               oob_score=False, random_state=None, verbose=0, warm_start=False)
 
     def text_preprocessing(self, df):
         import neattext as nt
@@ -59,10 +60,8 @@ class Classifier_with_text_processing(AbstractClassifier):
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        if options['algorithm'] == 'multilabel':
-            feature_data = self.text_preprocessing(df[feature_attrs])
-        else:
-            feature_data = df[feature_attrs]
+        feature_data = self.text_preprocessing(df[feature_attrs])
+
 
         target_data = df[target_attr]
 
@@ -91,16 +90,12 @@ class Classifier_with_text_processing(AbstractClassifier):
             ], axis=0))
         # Convert to Array  To See Result
 
-        if options['algorithm'] == 'multilabel':
-            y_pred = y_pred.toarray()
-            # y_pred.to_csv('/Users/yzhao/Documents/ai_for_operational_management/y_pred.csv', index=False)
+        y_pred = y_pred.toarray()
 
 
         metrics = None
-        if options is not None and options['algorithm'] == 'multilabel':
-            metrics = self.evaluate(target_data, y_pred, options)
-        else:
-            metrics = self.evaluate(target_data, y_pred, None)
+        metrics = self.evaluate(target_data, y_pred, options)
+
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
@@ -189,7 +184,8 @@ if __name__ == '__main__':
 
     ##############################################################################################################
     options = {
-        'algorithm': 'multilabel',
+        'algorithm': 'BinaryRelevance',
+        # 'algorithm': 'RandomForestClassifier',
         'feature_attrs': [
             'Event Name',
             'Host IP',
