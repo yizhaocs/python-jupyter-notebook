@@ -30,8 +30,7 @@ class Classifier_with_text_processing(AbstractClassifier):
             '''
             self.estimator = BinaryRelevance(GaussianNB())
         else:
-            self.estimator = RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini', n_estimators = 1000,
-                               oob_score=False, random_state=None, verbose=0, warm_start=False)
+            self.estimator = RandomForestClassifier()
 
     def text_preprocessing(self, df):
         import neattext as nt
@@ -90,11 +89,12 @@ class Classifier_with_text_processing(AbstractClassifier):
             ], axis=0))
         # Convert to Array  To See Result
 
-        y_pred = y_pred.toarray()
+        if options['algorithm'] == 'BinaryRelevance':
+            y_pred = y_pred.toarray()
 
 
         metrics = None
-        metrics = self.evaluate(target_data, y_pred, options)
+        metrics = self.evaluate(self.estimator, target_data, y_pred, options)
 
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
@@ -184,8 +184,8 @@ if __name__ == '__main__':
 
     ##############################################################################################################
     options = {
-        'algorithm': 'BinaryRelevance',
-        # 'algorithm': 'RandomForestClassifier',
+        # 'algorithm': 'BinaryRelevance',
+        'algorithm': 'RandomForestClassifier',
         'feature_attrs': [
             'Event Name',
             'Host IP',

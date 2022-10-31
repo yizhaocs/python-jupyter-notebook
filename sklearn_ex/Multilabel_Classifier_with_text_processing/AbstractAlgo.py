@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, \
     recall_score, precision_score, roc_auc_score, hamming_loss
@@ -82,7 +83,7 @@ class AbstractClassifier(AbstractAlgo):
     def __init__(self):
         self.ss_feature = StandardScaler()
 
-    def evaluate(self, y_true, y_pred, options = None):
+    def evaluate(self, model, y_true, y_pred, options=None):
         # Accuracy
         acc = accuracy_score(y_true, y_pred)
 
@@ -106,8 +107,18 @@ class AbstractClassifier(AbstractAlgo):
 
         metrics = {"accuracy:": acc, "hamming_score": ham, "confusion_matrix": confusion_metrix_dict}
         print(f'metrics:{metrics}')
-        return metrics
 
+        if options['algorithm'] == 'RandomForestClassifier':
+            importances = model.feature_importances_
+            std = np.std([tree.feature_importances_ for tree in model.estimators_], axis=0)
+            indices = np.argsort(importances)[::-1]
+
+            # Print the feature ranking
+            print("Feature ranking:")
+
+            for f in range(0, 27):
+                print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+        return metrics
 
     def infer(self, df, options):
         model_file = options['model']
@@ -123,13 +134,13 @@ class AbstractClassifier(AbstractAlgo):
         target_attr = options['target_attr']
         # output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
 
-
         columns = options['target_attr']
         predict_columns = []
         for index in range(len(columns)):
             predict_columns.append(columns[index] + '_predicted')
 
-        y_pred = y_pred.toarray()
+        if options['algorithm'] == 'BinaryRelevance':
+            y_pred = y_pred.toarray()
         output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
 
         return output
