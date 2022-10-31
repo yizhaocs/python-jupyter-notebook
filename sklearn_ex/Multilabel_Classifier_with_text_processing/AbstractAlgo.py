@@ -108,6 +108,9 @@ class AbstractClassifier(AbstractAlgo):
         metrics = {"accuracy:": acc, "hamming_score": ham, "confusion_matrix": confusion_metrix_dict}
         print(f'metrics:{metrics}')
 
+        '''
+            Feature ranking
+        '''
         if options['algorithm'] == 'RandomForestClassifier':
             importances = model.feature_importances_
             std = np.std([tree.feature_importances_ for tree in model.estimators_], axis=0)
@@ -118,6 +121,17 @@ class AbstractClassifier(AbstractAlgo):
 
             for f in range(0, 27):
                 print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+
+        '''
+            Each label accuracy
+        '''
+        y_pred = pd.DataFrame(y_pred, columns=options['target_attr'])
+        for label in options['target_attr']:
+            print('\n')
+            print('... Processing {}'.format(label))
+
+            # Checking overall accuracy
+            print('Testing Accuracy is {}'.format(accuracy_score(y_true[label], y_pred[label])))
         return metrics
 
     def infer(self, df, options):
