@@ -32,35 +32,37 @@ class Classifier_with_text_processing(AbstractClassifier):
         else:
             self.estimator = RandomForestClassifier()
 
-    def text_preprocessing(self, df):
+    def text_preprocessing(self, df, options):
         import neattext as nt
         import neattext.functions as nfx
 
         # Explore For Noise
-        df['Incident Title'].apply(lambda x: nt.TextFrame(x).noise_scan())
+        col = options['text_processing']
+        df[col].apply(lambda x: nt.TextFrame(x).noise_scan())
 
         # Explore For Noise
-        df['Incident Title'].apply(lambda x: nt.TextExtractor(x).extract_stopwords())
+        df[col].apply(lambda x: nt.TextExtractor(x).extract_stopwords())
 
         # Explore For Noise
-        df['Incident Title'].apply(nfx.remove_stopwords)
+        df[col].apply(nfx.remove_stopwords)
 
-        corpus = df['Incident Title'].apply(nfx.remove_stopwords)
+        corpus = df[col].apply(nfx.remove_stopwords)
 
         from sklearn.feature_extraction.text import TfidfVectorizer
         tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
         # Build Features
         Xfeatures = tfidf.fit_transform(corpus).toarray()
         df_tfidfvect = pd.DataFrame(data=Xfeatures, columns=tfidf.get_feature_names())
-        df = df.drop('Incident Title', axis=1)
+        df = df.drop(col, axis=1)
 
         return df_tfidfvect
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        if options['target_attr']:
-            df_tfidfvect = self.text_preprocessing(df[feature_attrs])
+        text_processing_attr = options['text_processing']
+        if options['text_processing']:
+            df_tfidfvect = self.text_preprocessing(df, options)
 
         feature_data = pd.concat([df, df_tfidfvect], axis=1)
         target_data = df[target_attr]
@@ -113,14 +115,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         return self.estimator, output, metrics
 
 
-if __name__ == '__main__':
-    ''' This is used for algorithm level test, should be run at the same dir of this file. 
-            python DecisionTreeClassifier.py
-    '''
-    import json
-
-    # raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/Multi-Label_Classification_Dataset/train.csv')
-    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
+def fortinet_report_preprocessing(raw_data):
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
     # print(incident_target_parsed.head())
@@ -183,7 +178,54 @@ if __name__ == '__main__':
     raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
 
 
+def real_data_test():
+    ''' This is used for algorithm level test, should be run at the same dir of this file.
+            python DecisionTreeClassifier.py
+    '''
+    import json
+
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/Multi-Label_Classification_Dataset/train.csv')
+
+    options = {
+        'algorithm': 'BinaryRelevance',
+        # 'algorithm': 'RandomForestClassifier',
+        'text_processing': 'TITLE',
+        'feature_attrs': [
+            'ABSTRACT'
+        ],
+        # 'target_attr': 'Incident Status',
+        'target_attr': ['Computer Science', 'Physics', 'Mathematics', 'Statistics', 'Statistics', 'Quantitative Biology', 'Quantitative Finance'],
+        'train_factor': 0.7
+    }
+
     ##############################################################################################################
+
+    decisiontree_classification = Classifier_with_text_processing(options)
+
+    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    print(output)
+    print(json.dumps(metrics, indent=2))
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_training.csv', index=False)
+
+    infer_data = raw_data.iloc[:, :]
+    # options.update({'model': pickle.dumps(model)})
+    options.update({'model': {MODEL_TYPE_SINGLE: model}})
+    output = decisiontree_classification.infer(infer_data, options)
+    print(output)
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_inference.csv', index=False)
+
+
+
+def fortinet_test():
+    ''' This is used for algorithm level test, should be run at the same dir of this file.
+            python DecisionTreeClassifier.py
+    '''
+    import json
+
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
+
     options = {
         'algorithm': 'BinaryRelevance',
         # 'algorithm': 'RandomForestClassifier',
@@ -208,10 +250,8 @@ if __name__ == '__main__':
         'train_factor': 0.7
     }
 
-
-
+    fortinet_report_preprocessing(raw_data)
     ##############################################################################################################
-
 
     decisiontree_classification = Classifier_with_text_processing(options)
 
@@ -228,3 +268,9 @@ if __name__ == '__main__':
     print(output)
 
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+
+
+if __name__ == '__main__':
+    # fortinet_test()
+    real_data_test()
+
