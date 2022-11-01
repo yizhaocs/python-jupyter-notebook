@@ -273,6 +273,6 @@ def fortinet_test():
 
 
 if __name__ == '__main__':
-    fortinet_test()
-    # real_data_test()
+    # fortinet_test()
+    real_data_test()
 
