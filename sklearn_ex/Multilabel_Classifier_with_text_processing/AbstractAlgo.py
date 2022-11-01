@@ -139,7 +139,11 @@ class AbstractClassifier(AbstractAlgo):
         model = model_file[MODEL_TYPE_SINGLE]
         feature_attrs = options['feature_attrs']
 
-        feature_data = self.text_preprocessing(df[feature_attrs])
+        # feature_data = self.text_preprocessing(df[feature_attrs])
+        if options['target_attr']:
+            df_tfidfvect = self.text_preprocessing(df[feature_attrs])
+
+        feature_data = pd.concat([df, df_tfidfvect], axis=1)
 
         ohe = OneHotEncoder()
         feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()

@@ -53,15 +53,16 @@ class Classifier_with_text_processing(AbstractClassifier):
         Xfeatures = tfidf.fit_transform(corpus).toarray()
         df_tfidfvect = pd.DataFrame(data=Xfeatures, columns=tfidf.get_feature_names())
         df = df.drop('Incident Title', axis=1)
-        df = pd.concat([df, df_tfidfvect], axis=1)
-        return df
+
+        return df_tfidfvect
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        feature_data = self.text_preprocessing(df[feature_attrs])
+        if options['target_attr']:
+            df_tfidfvect = self.text_preprocessing(df[feature_attrs])
 
-
+        feature_data = pd.concat([df, df_tfidfvect], axis=1)
         target_data = df[target_attr]
 
         ####################################################################################################
@@ -118,8 +119,8 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv('../../Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
-
+    # raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/Multi-Label_Classification_Dataset/train.csv')
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
     # print(incident_target_parsed.head())
@@ -184,8 +185,10 @@ if __name__ == '__main__':
 
     ##############################################################################################################
     options = {
-        # 'algorithm': 'BinaryRelevance',
-        'algorithm': 'RandomForestClassifier',
+        'algorithm': 'BinaryRelevance',
+        # 'algorithm': 'RandomForestClassifier',
+        # 'text_processing': 'TITLE',
+        'text_processing': 'Incident Title',
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -211,6 +214,7 @@ if __name__ == '__main__':
 
 
     decisiontree_classification = Classifier_with_text_processing(options)
+
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
