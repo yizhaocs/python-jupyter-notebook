@@ -53,7 +53,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         # Build Features
         Xfeatures = tfidf.fit_transform(corpus).toarray()
         df_tfidfvect = pd.DataFrame(data=Xfeatures, columns=tfidf.get_feature_names())
-        df = df.drop(col, axis=1)
+        # df = df.drop(col, axis=1)
 
         return df_tfidfvect
 
@@ -64,8 +64,9 @@ class Classifier_with_text_processing(AbstractClassifier):
         if options['text_processing']:
             df_tfidfvect = self.text_preprocessing(df, options)
             df = df.drop(text_processing_attr, axis=1)
-
-        feature_data = pd.concat([df, df_tfidfvect], axis=1)
+            feature_data = pd.concat([df, df_tfidfvect], axis=1)
+        else:
+            feature_data = df[feature_attrs]
         target_data = df[target_attr]
 
         ####################################################################################################
@@ -272,6 +273,6 @@ def fortinet_test():
 
 
 if __name__ == '__main__':
-    # fortinet_test()
-    real_data_test()
+    fortinet_test()
+    # real_data_test()
 
