@@ -144,6 +144,7 @@ class AbstractClassifier(AbstractAlgo):
         text_processing_attr = options['text_processing']
         if options['text_processing']:
             df_tfidfvect = self.text_preprocessing(df, options)
+            df = df.drop(text_processing_attr, axis=1)
 
 
         feature_data = pd.concat([df, df_tfidfvect], axis=1)
