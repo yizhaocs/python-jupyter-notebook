@@ -95,7 +95,7 @@ class AbstractClassifier(AbstractAlgo):
         confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)
         columns = y_true.columns
         confusion_metrix_dict = {}
-        for index in range(len(confusion_matrix)):
+        for index in range(len(columns)):
             single_confusion = confusion_matrix[index]
             confusion = {
                 "True Negative": int(single_confusion[0, 0]),
@@ -138,17 +138,16 @@ class AbstractClassifier(AbstractAlgo):
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
         feature_attrs = options['feature_attrs']
-
-        # feature_data = self.text_preprocessing(df[feature_attrs])
-
+        target_attr = options['target_attr']
         text_processing_attr = options['text_processing']
-
         if options['text_processing']:
             df_tfidfvect = self.text_preprocessing(df, options)
             df = df.drop(text_processing_attr, axis=1)
             feature_data = pd.concat([df, df_tfidfvect], axis=1)
+            feature_data.drop(target_attr, axis=1)
         else:
             feature_data = df[feature_attrs]
+        target_data = df[target_attr]
 
         ohe = OneHotEncoder()
         feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()

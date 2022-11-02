@@ -65,6 +65,7 @@ class Classifier_with_text_processing(AbstractClassifier):
             df_tfidfvect = self.text_preprocessing(df, options)
             df = df.drop(text_processing_attr, axis=1)
             feature_data = pd.concat([df, df_tfidfvect], axis=1)
+            feature_data.drop(target_attr, axis=1)
         else:
             feature_data = df[feature_attrs]
         target_data = df[target_attr]
@@ -237,7 +238,6 @@ def fortinet_test():
             'Event Name',
             'Host IP',
             'Host Name',
-            'Incident Title',
             'Incident Source',
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
@@ -257,6 +257,8 @@ def fortinet_test():
 
     decisiontree_classification = Classifier_with_text_processing(options)
 
+    print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
+
     model, output, metrics = decisiontree_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -273,6 +275,6 @@ def fortinet_test():
 
 
 if __name__ == '__main__':
-    # fortinet_test()
-    real_data_test()
+    fortinet_test()
+    # real_data_test()
 
