@@ -265,6 +265,7 @@ def fortinet_test():
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
     options.update({'model': {MODEL_TYPE_SINGLE: model, 'OneHotEncoder': ohe}})
+
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
@@ -315,7 +316,7 @@ def fortinet_test_2():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model}, 'OneHotEncoder': ohe})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, 'OneHotEncoder': ohe}})
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
@@ -323,6 +324,6 @@ def fortinet_test_2():
 
 
 if __name__ == '__main__':
-    fortinet_test()
-    # fortinet_test_2()
+    # fortinet_test()
+    fortinet_test_2()
     # real_data_test()
