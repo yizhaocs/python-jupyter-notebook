@@ -57,7 +57,7 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         return df_tfidfvect
 
-    def train(self, df, options):
+    def train(self, df, options, oneHotEncoder=None):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
         if 'text_processing' in options:
@@ -71,8 +71,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         target_data = df[target_attr]
 
         ####################################################################################################
-        ohe = OneHotEncoder()
-        feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()
+        feature_data_with_one_hot_encoding = oneHotEncoder.fit_transform(feature_data).toarray()
         ####################################################################################################
 
         # 1. Split the data randomly with 70:30 of train and test.
@@ -98,10 +97,8 @@ class Classifier_with_text_processing(AbstractClassifier):
         if options['algorithm'] == 'BinaryRelevance':
             y_pred = y_pred.toarray()
 
-
         metrics = None
         metrics = self.evaluate(self.estimator, target_data, y_pred, options)
-
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
@@ -181,6 +178,7 @@ def fortinet_report_preprocessing(raw_data):
     raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
     return raw_data
 
+
 def real_data_test():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
@@ -220,7 +218,6 @@ def real_data_test():
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_inference.csv', index=False)
 
 
-
 def fortinet_test():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
@@ -258,8 +255,8 @@ def fortinet_test():
     decisiontree_classification = Classifier_with_text_processing(options)
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
-
-    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    ohe = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, ohe)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -267,11 +264,12 @@ def fortinet_test():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model}})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, 'OneHotEncoder': ohe}})
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+
 
 def fortinet_test_2():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
@@ -308,8 +306,8 @@ def fortinet_test_2():
     decisiontree_classification = Classifier_with_text_processing(options)
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
-
-    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    ohe = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, ohe)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -317,7 +315,7 @@ def fortinet_test_2():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model}})
+    options.update({'model': {MODEL_TYPE_SINGLE: model}, 'OneHotEncoder': ohe})
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
 
@@ -328,4 +326,3 @@ if __name__ == '__main__':
     fortinet_test()
     # fortinet_test_2()
     # real_data_test()
-

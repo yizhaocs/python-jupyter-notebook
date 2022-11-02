@@ -137,6 +137,7 @@ class AbstractClassifier(AbstractAlgo):
     def infer(self, df, options):
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
+        ohe = model_file['OneHotEncoder']
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
         if 'text_processing' in options:
@@ -148,7 +149,7 @@ class AbstractClassifier(AbstractAlgo):
         else:
             feature_data = df[feature_attrs]
 
-        ohe = OneHotEncoder()
+        # ohe = OneHotEncoder()
         feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()
         ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
         y_pred = model.predict(ss_feature_data)
