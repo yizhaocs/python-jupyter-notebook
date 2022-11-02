@@ -150,7 +150,7 @@ class AbstractClassifier(AbstractAlgo):
             feature_data = df[feature_attrs]
 
         # ohe = OneHotEncoder()
-        feature_data_with_one_hot_encoding = ohe.fit_transform(feature_data).toarray()
+        feature_data_with_one_hot_encoding = ohe.transform(feature_data).toarray()
         ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
         y_pred = model.predict(ss_feature_data)
         target_attr = options['target_attr']
