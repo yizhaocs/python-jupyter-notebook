@@ -90,7 +90,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         # 4. Evaluate the model performance
         y_pred = self.estimator.predict(
             pd.concat([
-                pd.DataFrame(ss_feature_train),
+                # pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
         # Convert to Array  To See Result
@@ -99,7 +99,7 @@ class Classifier_with_text_processing(AbstractClassifier):
             y_pred = y_pred.toarray()
 
         metrics = None
-        metrics = self.evaluate(self.estimator, target_data, y_pred, options)
+        metrics = self.evaluate(self.estimator, target_test, y_pred, options)
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
@@ -334,6 +334,6 @@ def fortinet_test_2():
 
 
 if __name__ == '__main__':
-    fortinet_test()
-    # fortinet_test_2()
+    # fortinet_test()
+    fortinet_test_2()
     # real_data_test()
