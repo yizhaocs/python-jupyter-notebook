@@ -60,8 +60,8 @@ class Classifier_with_text_processing(AbstractClassifier):
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        text_processing_attr = options['text_processing']
-        if options['text_processing']:
+        if 'text_processing' in options:
+            text_processing_attr = options['text_processing']
             df_tfidfvect = self.text_preprocessing(df, options)
             df = df.drop(text_processing_attr, axis=1)
             feature_data = pd.concat([df, df_tfidfvect], axis=1)
@@ -179,7 +179,7 @@ def fortinet_report_preprocessing(raw_data):
     incident_status = raw_data['Incident Status']
     incident_resolution = raw_data['Incident Resolution']
     raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
-
+    return raw_data
 
 def real_data_test():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
@@ -252,7 +252,57 @@ def fortinet_test():
         'train_factor': 0.7
     }
 
-    fortinet_report_preprocessing(raw_data)
+    raw_data = fortinet_report_preprocessing(raw_data)
+    ##############################################################################################################
+
+    decisiontree_classification = Classifier_with_text_processing(options)
+
+    print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
+
+    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    print(output)
+    print(json.dumps(metrics, indent=2))
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
+
+    infer_data = raw_data.iloc[:, :]
+    # options.update({'model': pickle.dumps(model)})
+    options.update({'model': {MODEL_TYPE_SINGLE: model}})
+    output = decisiontree_classification.infer(infer_data, options)
+    print(output)
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+
+def fortinet_test_2():
+    ''' This is used for algorithm level test, should be run at the same dir of this file.
+            python DecisionTreeClassifier.py
+    '''
+    import json
+
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
+
+    options = {
+        'algorithm': 'BinaryRelevance',
+        # 'text_processing': 'Incident Title',
+        'feature_attrs': [
+            'Event Name',
+            'Host IP',
+            'Host Name',
+            'Incident Source',
+            'Incident Reporting Device',
+            'incident_target_parsed_hostName',
+            'incident_target_parsed_hostIpAddr',
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)',
+            'techniqueid'
+        ],
+        # 'target_attr': 'Incident Status',
+        'target_attr': ['Incident Resolution'],
+        'train_factor': 0.7
+    }
+
+    raw_data = fortinet_report_preprocessing(raw_data)
     ##############################################################################################################
 
     decisiontree_classification = Classifier_with_text_processing(options)
@@ -276,5 +326,6 @@ def fortinet_test():
 
 if __name__ == '__main__':
     fortinet_test()
+    # fortinet_test_2()
     # real_data_test()
 
