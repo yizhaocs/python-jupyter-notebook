@@ -465,7 +465,7 @@ def fortinet_test_4():
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
     if 'encoder' in options:
         if options['encoder'] == 'OrdinalEncoder':
-            encoder = OrdinalEncoder()
+            encoder = OrdinalEncoder(encoded_missing_value=-1)
         elif options['encoder'] == 'LabelEncoder':
             encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
