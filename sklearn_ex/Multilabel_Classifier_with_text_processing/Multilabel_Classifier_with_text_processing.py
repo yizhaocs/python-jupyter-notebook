@@ -320,6 +320,7 @@ def fortinet_test_2():
     options.update({'model': {MODEL_TYPE_SINGLE: model, 'OneHotEncoder': ohe}})
 
     t0 = datetime.now()
+    # x = infer_data.iloc[:1 + 10, :]
     for i in range(1000):
         output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
         print(i)
@@ -335,5 +336,5 @@ def fortinet_test_2():
 
 if __name__ == '__main__':
     # fortinet_test()
-    # fortinet_test_2()
-    real_data_test()
+    fortinet_test_2()
+    # real_data_test()
