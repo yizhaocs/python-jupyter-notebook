@@ -235,7 +235,8 @@ def fortinet_test():
 
     options = {
         'algorithm': 'BinaryRelevance',
-        'encoder': 'OneHotEncoder',
+        # 'encoder': 'OneHotEncoder',
+        'encoder': 'LabelEncoder',
         # 'algorithm': 'RandomForestClassifier',
         # 'text_processing': 'TITLE',
         'text_processing': 'Incident Title',
@@ -294,7 +295,8 @@ def fortinet_test_2():
 
     options = {
         'algorithm': 'BinaryRelevance',
-        'encoder': 'OneHotEncoder',
+        # 'encoder': 'OneHotEncoder',
+        'encoder': 'LabelEncoder',
         # 'text_processing': 'Incident Title',
         'feature_attrs': [
             'Event Name',
@@ -417,7 +419,7 @@ def fortinet_test_3():
 
 
 if __name__ == '__main__':
-    fortinet_test()
-    # fortinet_test_2()
+    # fortinet_test()
+    fortinet_test_2()
     # fortinet_test_3()
     # real_data_test()
