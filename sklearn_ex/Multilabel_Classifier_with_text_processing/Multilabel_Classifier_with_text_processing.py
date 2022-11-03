@@ -364,7 +364,7 @@ def fortinet_test_3():
         'algorithm': 'BinaryRelevance',
         'encoder': 'LabelEncoder',
         # 'encoder': 'OneHotEncoder',
-        # 'text_processing': 'Incident Title',
+        'text_processing': 'Incident Title',
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -391,10 +391,10 @@ def fortinet_test_3():
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
     if 'encoder' in options:
         if options['encoder'] == 'LabelEncoder':
-            enconder = LabelEncoder()
+            encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
-            enconder = OneHotEncoder()
-    model, output, metrics = decisiontree_classification.train(raw_data, options, enconder)
+            encoder = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, encoder)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -402,13 +402,14 @@ def fortinet_test_3():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: enconder}})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: encoder}})
 
     t0 = datetime.now()
     # x = infer_data.iloc[:1 + 10, :]
     for i in range(1000):
         output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
-        print(i)
+        # output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+        # print(i)
 
     delta = datetime.now() - t0
 
