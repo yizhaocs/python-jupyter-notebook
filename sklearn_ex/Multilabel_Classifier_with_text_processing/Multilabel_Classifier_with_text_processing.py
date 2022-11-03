@@ -81,6 +81,7 @@ class Classifier_with_text_processing(AbstractClassifier):
                 feature_data_with_encoding = enconder.fit_transform(feature_data).toarray()
         ####################################################################################################
 
+        print(f'feature_data_with_encoding.shape: {feature_data_with_encoding.shape}')
         # 1. Split the data randomly with 70:30 of train and test.
         feature_train, feature_test, target_train, target_test = \
             train_test_split(feature_data_with_encoding, target_data, random_state=42, shuffle=True,
@@ -359,10 +360,10 @@ def fortinet_test_3():
     import json
 
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
-
     options = {
         'algorithm': 'BinaryRelevance',
         'encoder': 'LabelEncoder',
+        # 'encoder': 'OneHotEncoder',
         # 'text_processing': 'Incident Title',
         'feature_attrs': [
             'Event Name',
@@ -420,6 +421,6 @@ def fortinet_test_3():
 
 if __name__ == '__main__':
     # fortinet_test()
-    fortinet_test_2()
-    # fortinet_test_3()
+    # fortinet_test_2()
+    fortinet_test_3()
     # real_data_test()
