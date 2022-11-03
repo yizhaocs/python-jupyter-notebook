@@ -19,6 +19,8 @@ DIFF_NAME = 'error'
 MODEL_TYPE_SINGLE = 'single'
 MODEL_TYPE_MULTI = 'multi'
 
+ENCODER = 'encoder'
+
 APPSERVER_TASK_ID_NAME = 'xmlId'
 APPSERVER_TASK_TYPE_NAME = 'type'
 APPSERVER_TASK_TYPE_TRAIN = 'TrainMachineLearningModel'

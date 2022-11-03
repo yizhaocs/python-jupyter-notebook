@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 from sklearn_ex.Multilabel_Classifier_with_text_processing.utils.const_utils import MODEL_TYPE_SINGLE
 from sklearn_ex.Multilabel_Classifier_with_text_processing.utils.excp_utils import phMLNotImplError
+from sklearn_ex.utils.const_utils import ENCODER
 
 
 class AbstractAlgo(object):
@@ -137,7 +138,7 @@ class AbstractClassifier(AbstractAlgo):
     def infer(self, df, options):
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
-        ohe = model_file['OneHotEncoder']
+        encoder = model_file[ENCODER]
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
         if 'text_processing' in options:
@@ -150,7 +151,7 @@ class AbstractClassifier(AbstractAlgo):
             feature_data = df[feature_attrs]
 
         # ohe = OneHotEncoder()
-        feature_data_with_one_hot_encoding = ohe.transform(feature_data).toarray()
+        feature_data_with_one_hot_encoding = encoder.transform(feature_data).toarray()
         ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
         y_pred = model.predict(ss_feature_data)
         target_attr = options['target_attr']

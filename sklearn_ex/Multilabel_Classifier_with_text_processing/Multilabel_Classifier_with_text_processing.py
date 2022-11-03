@@ -5,11 +5,11 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
 from skmultilearn.problem_transform import BinaryRelevance
 
 from sklearn_ex.Multilabel_Classifier_with_text_processing.AbstractAlgo import AbstractClassifier
-from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION
+from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION, ENCODER
 
 
 class Classifier_with_text_processing(AbstractClassifier):
@@ -229,6 +229,7 @@ def fortinet_test():
 
     options = {
         'algorithm': 'BinaryRelevance',
+        'encoder': 'OneHotEncoder',
         # 'algorithm': 'RandomForestClassifier',
         # 'text_processing': 'TITLE',
         'text_processing': 'Incident Title',
@@ -256,8 +257,12 @@ def fortinet_test():
     decisiontree_classification = Classifier_with_text_processing(options)
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
-    ohe = OneHotEncoder()
-    model, output, metrics = decisiontree_classification.train(raw_data, options, ohe)
+    if 'encoder' in options:
+        if options['encoder'] == 'LabelEncoder':
+            enconder = LabelEncoder()
+        elif options['encoder'] == 'OneHotEncoder':
+            enconder = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, enconder)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -265,7 +270,7 @@ def fortinet_test():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model, 'OneHotEncoder': ohe}})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: enconder}})
 
     output = decisiontree_classification.infer(infer_data, options)
     print(output)
@@ -283,6 +288,7 @@ def fortinet_test_2():
 
     options = {
         'algorithm': 'BinaryRelevance',
+        'encoder': 'OneHotEncoder',
         # 'text_processing': 'Incident Title',
         'feature_attrs': [
             'Event Name',
@@ -308,8 +314,12 @@ def fortinet_test_2():
     decisiontree_classification = Classifier_with_text_processing(options)
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
-    ohe = OneHotEncoder()
-    model, output, metrics = decisiontree_classification.train(raw_data, options, ohe)
+    if 'encoder' in options:
+        if options['encoder'] == 'LabelEncoder':
+            enconder = LabelEncoder()
+        elif options['encoder'] == 'OneHotEncoder':
+            enconder = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, enconder)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -317,7 +327,73 @@ def fortinet_test_2():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model, 'OneHotEncoder': ohe}})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: enconder}})
+
+    t0 = datetime.now()
+    # x = infer_data.iloc[:1 + 10, :]
+    for i in range(1000):
+        output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+        print(i)
+
+    delta = datetime.now() - t0
+
+    print(f'delta:{delta}')
+    # output = decisiontree_classification.infer(infer_data, options)
+    # print(output)
+
+    # output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+
+
+def fortinet_test_3():
+    ''' This is used for algorithm level test, should be run at the same dir of this file.
+            python DecisionTreeClassifier.py
+    '''
+    import json
+
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
+
+    options = {
+        'algorithm': 'BinaryRelevance',
+        'encoder': 'LabelEncoder',
+        # 'text_processing': 'Incident Title',
+        'feature_attrs': [
+            'Event Name',
+            'Host IP',
+            'Host Name',
+            'Incident Source',
+            'Incident Reporting Device',
+            'incident_target_parsed_hostName',
+            'incident_target_parsed_hostIpAddr',
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)',
+            'techniqueid'
+        ],
+        # 'target_attr': 'Incident Status',
+        'target_attr': ['Incident Resolution'],
+        'train_factor': 0.7
+    }
+
+    raw_data = fortinet_report_preprocessing(raw_data)
+    ##############################################################################################################
+
+    decisiontree_classification = Classifier_with_text_processing(options)
+
+    print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
+    if 'encoder' in options:
+        if options['encoder'] == 'LabelEncoder':
+            enconder = LabelEncoder()
+        elif options['encoder'] == 'OneHotEncoder':
+            enconder = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, enconder)
+    print(output)
+    print(json.dumps(metrics, indent=2))
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
+
+    infer_data = raw_data.iloc[:, :]
+    # options.update({'model': pickle.dumps(model)})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: enconder}})
 
     t0 = datetime.now()
     # x = infer_data.iloc[:1 + 10, :]
@@ -336,5 +412,6 @@ def fortinet_test_2():
 
 if __name__ == '__main__':
     # fortinet_test()
-    fortinet_test_2()
+    # fortinet_test_2()
+    fortinet_test_3()
     # real_data_test()
