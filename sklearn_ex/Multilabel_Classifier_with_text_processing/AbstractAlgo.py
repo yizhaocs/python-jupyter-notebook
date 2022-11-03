@@ -151,12 +151,13 @@ class AbstractClassifier(AbstractAlgo):
             feature_data = df[feature_attrs]
 
 
-        if 'encoder' in options:
-            if options['encoder'] == 'OrdinalEncoder':
+        if 'encoder_type' in options:
+            encoder = options['encoder']
+            if options['encoder_type'] == 'OrdinalEncoder':
                 feature_data_with_encoding = encoder.transform(feature_data)
-            elif options['encoder'] == 'LabelEncoder':
+            elif options['encoder_type'] == 'LabelEncoder':
                 feature_data_with_encoding = feature_data.apply(encoder.fit_transform)
-            elif options['encoder'] == 'OneHotEncoder':
+            elif options['encoder_type'] == 'OneHotEncoder':
                 feature_data_with_encoding = encoder.transform(feature_data).toarray()
 
 
