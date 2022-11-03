@@ -238,8 +238,8 @@ def fortinet_test():
 
     options = {
         'algorithm': 'BinaryRelevance',
-        # 'encoder': 'OneHotEncoder',
-        'encoder': 'LabelEncoder',
+        'encoder': 'OneHotEncoder',
+        # 'encoder': 'LabelEncoder',
         # 'algorithm': 'RandomForestClassifier',
         # 'text_processing': 'TITLE',
         'text_processing': 'Incident Title',
@@ -268,11 +268,13 @@ def fortinet_test():
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
     if 'encoder' in options:
-        if options['encoder'] == 'LabelEncoder':
-            enconder = LabelEncoder()
+        if options['encoder'] == 'OrdinalEncoder':
+            encoder = OrdinalEncoder()
+        elif options['encoder'] == 'LabelEncoder':
+            encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
-            enconder = OneHotEncoder()
-    model, output, metrics = decisiontree_classification.train(raw_data, options, enconder)
+            encoder = OneHotEncoder()
+    model, output, metrics = decisiontree_classification.train(raw_data, options, encoder)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -280,13 +282,18 @@ def fortinet_test():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: enconder}})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: encoder}})
 
-    output = decisiontree_classification.infer(infer_data, options)
-    print(output)
+    t0 = datetime.now()
+    # x = infer_data.iloc[:1 + 10, :]
+    for i in range(1000):
+        # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+        output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+        # print(i)
 
-    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+    delta = datetime.now() - t0
 
+    print(f'delta:{delta}')
 
 def fortinet_test_2():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
@@ -496,8 +503,8 @@ def fortinet_test_4():
     # output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
 
 if __name__ == '__main__':
-    # fortinet_test()
+    fortinet_test()
     # fortinet_test_2()
     # fortinet_test_3()
-    fortinet_test_4()
+    # fortinet_test_4()
     # real_data_test()
