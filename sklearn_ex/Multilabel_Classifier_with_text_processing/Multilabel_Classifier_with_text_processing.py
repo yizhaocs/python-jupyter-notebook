@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder, OrdinalEncoder
@@ -33,10 +34,10 @@ class Classifier_with_text_processing(AbstractClassifier):
         else:
             self.estimator = RandomForestClassifier()
 
-    def text_preprocessing(self, df, options):
+    def text_preprocessing(self, df, options, mode):
         import neattext as nt
         import neattext.functions as nfx
-
+        tfidf = options['tfidf']
         # Explore For Noise
         col = options['text_processing']
         df[col].apply(lambda x: nt.TextFrame(x).noise_scan())
@@ -49,21 +50,22 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         corpus = df[col].apply(nfx.remove_stopwords)
 
-        from sklearn.feature_extraction.text import TfidfVectorizer
-        tfidf = TfidfVectorizer(analyzer='word', stop_words='english')
         # Build Features
-        Xfeatures = tfidf.fit_transform(corpus).toarray()
+        if mode == 'train':
+            Xfeatures = tfidf.fit_transform(corpus).toarray()
+        else:
+            Xfeatures = tfidf.transform(corpus).toarray()
         df_tfidfvect = pd.DataFrame(data=Xfeatures, columns=tfidf.get_feature_names())
         # df = df.drop(col, axis=1)
 
         return df_tfidfvect
 
-    def train(self, df, options, enconder=None):
+    def train(self, df, options, enconder=None, tfidf=None):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
         if 'text_processing' in options:
             text_processing_attr = options['text_processing']
-            df_tfidfvect = self.text_preprocessing(df, options)
+            df_tfidfvect = self.text_preprocessing(df, options, 'train')
             df = df.drop(text_processing_attr, axis=1)
             feature_data = pd.concat([df, df_tfidfvect], axis=1)
             feature_data.drop(target_attr, axis=1)
@@ -72,7 +74,6 @@ class Classifier_with_text_processing(AbstractClassifier):
         target_data = df[target_attr]
 
         ####################################################################################################
-
 
         if 'encoder' in options:
             if options['encoder'] == 'OrdinalEncoder':
@@ -243,6 +244,7 @@ def fortinet_test():
         # 'algorithm': 'RandomForestClassifier',
         # 'text_processing': 'TITLE',
         'text_processing': 'Incident Title',
+        'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -273,7 +275,7 @@ def fortinet_test():
         elif options['encoder'] == 'LabelEncoder':
             encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
-            encoder = OneHotEncoder()
+            encoder = OneHotEncoder(handle_unknown='ignore')
     model, output, metrics = decisiontree_classification.train(raw_data, options, encoder)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -294,6 +296,7 @@ def fortinet_test():
     delta = datetime.now() - t0
 
     print(f'delta:{delta}')
+
 
 def fortinet_test_2():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
@@ -334,12 +337,12 @@ def fortinet_test_2():
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
     if 'encoder' in options:
         if options['encoder'] == 'OrdinalEncoder':
-            enconder = OrdinalEncoder()
+            encoder = OrdinalEncoder()
         elif options['encoder'] == 'LabelEncoder':
-            enconder = LabelEncoder()
+            encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
-            enconder = OneHotEncoder()
-    model, output, metrics = decisiontree_classification.train(raw_data, options, enconder)
+            encoder = OneHotEncoder(handle_unknown='ignore')
+    model, output, metrics = decisiontree_classification.train(raw_data, options, encoder)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -407,7 +410,7 @@ def fortinet_test_3():
         elif options['encoder'] == 'LabelEncoder':
             encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
-            encoder = OneHotEncoder()
+            encoder = OneHotEncoder(handle_unknown='ignore')
     model, output, metrics = decisiontree_classification.train(raw_data, options, encoder)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -432,6 +435,7 @@ def fortinet_test_3():
     # print(output)
 
     # output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+
 
 def fortinet_test_4():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
@@ -476,7 +480,7 @@ def fortinet_test_4():
         elif options['encoder'] == 'LabelEncoder':
             encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
-            encoder = OneHotEncoder()
+            encoder = OneHotEncoder(handle_unknown='ignore')
     model, output, metrics = decisiontree_classification.train(raw_data, options, encoder)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -501,6 +505,7 @@ def fortinet_test_4():
     # print(output)
 
     # output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
+
 
 if __name__ == '__main__':
     fortinet_test()
