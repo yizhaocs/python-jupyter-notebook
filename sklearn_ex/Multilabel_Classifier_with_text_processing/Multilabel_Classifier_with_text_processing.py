@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB, GaussianNB
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder, OrdinalEncoder
 from skmultilearn.problem_transform import BinaryRelevance
 
 from sklearn_ex.Multilabel_Classifier_with_text_processing.AbstractAlgo import AbstractClassifier
@@ -75,7 +75,9 @@ class Classifier_with_text_processing(AbstractClassifier):
 
 
         if 'encoder' in options:
-            if options['encoder'] == 'LabelEncoder':
+            if options['encoder'] == 'OrdinalEncoder':
+                feature_data_with_encoding = enconder.fit_transform(feature_data)
+            elif options['encoder'] == 'LabelEncoder':
                 feature_data_with_encoding = feature_data.apply(enconder.fit_transform)
             elif options['encoder'] == 'OneHotEncoder':
                 feature_data_with_encoding = enconder.fit_transform(feature_data).toarray()
@@ -324,7 +326,9 @@ def fortinet_test_2():
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
     if 'encoder' in options:
-        if options['encoder'] == 'LabelEncoder':
+        if options['encoder'] == 'OrdinalEncoder':
+            enconder = OrdinalEncoder()
+        elif options['encoder'] == 'LabelEncoder':
             enconder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
             enconder = OneHotEncoder()
@@ -362,9 +366,10 @@ def fortinet_test_3():
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
     options = {
         'algorithm': 'BinaryRelevance',
-        'encoder': 'LabelEncoder',
+        'encoder': 'OrdinalEncoder',
+        # 'encoder': 'LabelEncoder',
         # 'encoder': 'OneHotEncoder',
-        'text_processing': 'Incident Title',
+        # 'text_processing': 'Incident Title',
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -390,7 +395,9 @@ def fortinet_test_3():
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
     if 'encoder' in options:
-        if options['encoder'] == 'LabelEncoder':
+        if options['encoder'] == 'OrdinalEncoder':
+            encoder = OrdinalEncoder()
+        elif options['encoder'] == 'LabelEncoder':
             encoder = LabelEncoder()
         elif options['encoder'] == 'OneHotEncoder':
             encoder = OneHotEncoder()

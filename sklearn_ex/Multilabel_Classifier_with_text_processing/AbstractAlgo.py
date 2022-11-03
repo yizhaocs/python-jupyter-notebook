@@ -150,11 +150,11 @@ class AbstractClassifier(AbstractAlgo):
         else:
             feature_data = df[feature_attrs]
 
-        # ohe = OneHotEncoder()
-
 
         if 'encoder' in options:
-            if options['encoder'] == 'LabelEncoder':
+            if options['encoder'] == 'OrdinalEncoder':
+                feature_data_with_encoding = encoder.transform(feature_data).toarray()
+            elif options['encoder'] == 'LabelEncoder':
                 feature_data_with_encoding = feature_data.apply(encoder.fit_transform)
             elif options['encoder'] == 'OneHotEncoder':
                 feature_data_with_encoding = encoder.transform(feature_data).toarray()
