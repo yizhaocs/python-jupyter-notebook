@@ -58,7 +58,7 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         return df_tfidfvect
 
-    def train(self, df, options, oneHotEncoder=None):
+    def train(self, df, options, enconder=None):
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
         if 'text_processing' in options:
@@ -72,12 +72,12 @@ class Classifier_with_text_processing(AbstractClassifier):
         target_data = df[target_attr]
 
         ####################################################################################################
-        feature_data_with_one_hot_encoding = oneHotEncoder.fit_transform(feature_data).toarray()
+        feature_data_with_encoding = enconder.fit_transform(feature_data).toarray()
         ####################################################################################################
 
         # 1. Split the data randomly with 70:30 of train and test.
         feature_train, feature_test, target_train, target_test = \
-            train_test_split(feature_data_with_one_hot_encoding, target_data, random_state=42, shuffle=True,
+            train_test_split(feature_data_with_encoding, target_data, random_state=42, shuffle=True,
                              test_size=1 - float(options['train_factor']))
         self.ss_feature = StandardScaler()
         # 2. Standardlize the train and test data of features.
