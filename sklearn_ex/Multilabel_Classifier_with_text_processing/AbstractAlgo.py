@@ -151,8 +151,16 @@ class AbstractClassifier(AbstractAlgo):
             feature_data = df[feature_attrs]
 
         # ohe = OneHotEncoder()
-        feature_data_with_one_hot_encoding = encoder.transform(feature_data).toarray()
-        ss_feature_data = self.ss_feature.fit_transform(feature_data_with_one_hot_encoding)
+
+
+        if 'encoder' in options:
+            if options['encoder'] == 'LabelEncoder':
+                feature_data_with_encoding = feature_data.apply(encoder.fit_transform)
+            elif options['encoder'] == 'OneHotEncoder':
+                feature_data_with_encoding = encoder.transform(feature_data).toarray()
+
+
+        ss_feature_data = self.ss_feature.fit_transform(feature_data_with_encoding)
         y_pred = model.predict(ss_feature_data)
         target_attr = options['target_attr']
         # output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)

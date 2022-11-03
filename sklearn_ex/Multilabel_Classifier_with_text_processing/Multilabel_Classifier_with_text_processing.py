@@ -72,7 +72,13 @@ class Classifier_with_text_processing(AbstractClassifier):
         target_data = df[target_attr]
 
         ####################################################################################################
-        feature_data_with_encoding = enconder.fit_transform(feature_data).toarray()
+
+
+        if 'encoder' in options:
+            if options['encoder'] == 'LabelEncoder':
+                feature_data_with_encoding = feature_data.apply(enconder.fit_transform)
+            elif options['encoder'] == 'OneHotEncoder':
+                feature_data_with_encoding = enconder.fit_transform(feature_data).toarray()
         ####################################################################################################
 
         # 1. Split the data randomly with 70:30 of train and test.
@@ -411,7 +417,7 @@ def fortinet_test_3():
 
 
 if __name__ == '__main__':
-    # fortinet_test()
+    fortinet_test()
     # fortinet_test_2()
-    fortinet_test_3()
+    # fortinet_test_3()
     # real_data_test()
