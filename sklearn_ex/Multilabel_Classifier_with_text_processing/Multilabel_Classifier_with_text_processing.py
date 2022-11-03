@@ -483,8 +483,8 @@ def fortinet_test_4():
     t0 = datetime.now()
     # x = infer_data.iloc[:1 + 10, :]
     for i in range(1000):
-        output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
-        # output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+        # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+        output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
         # print(i)
 
     delta = datetime.now() - t0
