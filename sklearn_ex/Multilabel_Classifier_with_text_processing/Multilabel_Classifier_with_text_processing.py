@@ -289,11 +289,14 @@ def fortinet_test_with_text_processing():
     options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: options['encoder']}})
 
     t0 = datetime.now()
+
+    output = decisiontree_classification.infer(infer_data, options)
+
     # x = infer_data.iloc[:1 + 10, :]
-    for i in range(1000):
-        # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
-        output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
-        print(i)
+    # for i in range(1000):
+    #     # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+    #     output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+    #     print(i)
 
     delta = datetime.now() - t0
 
