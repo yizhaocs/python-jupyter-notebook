@@ -88,7 +88,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         print(f'feature_data_with_encoding.shape: {feature_data_with_encoding.shape}')
         # 1. Split the data randomly with 70:30 of train and test.
         feature_train, feature_test, target_train, target_test = \
-            train_test_split(feature_data_with_encoding, target_data, random_state=42, shuffle=True,
+            train_test_split(feature_data_with_encoding, target_data, random_state=42, shuffle=False,
                              test_size=1 - float(options['train_factor']))
         self.ss_feature = StandardScaler()
         # 2. Standardlize the train and test data of features.
@@ -101,7 +101,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         # 4. Evaluate the model performance
         y_pred = self.estimator.predict(
             pd.concat([
-                # pd.DataFrame(ss_feature_train),
+                pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
         # Convert to Array  To See Result
@@ -110,7 +110,10 @@ class Classifier_with_text_processing(AbstractClassifier):
             y_pred = y_pred.toarray()
 
         metrics = None
-        metrics = self.evaluate(self.estimator, target_test, y_pred, options)
+        metrics = self.evaluate(self.estimator, pd.concat([
+                pd.DataFrame(target_train),
+                pd.DataFrame(target_test)
+            ], axis=0), y_pred, options)
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
@@ -230,7 +233,7 @@ def real_data_test():
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_inference.csv', index=False)
 
 
-def fortinet_test():
+def fortinet_test_with_text_processing():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
     '''
@@ -290,13 +293,13 @@ def fortinet_test():
     for i in range(1000):
         # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
         output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
-        # print(i)
+        print(i)
 
     delta = datetime.now() - t0
 
     print(f'delta:{delta}')
 
-def fortinet_test_2():
+def fortinet_test_without_text_processing():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
     '''
@@ -306,16 +309,16 @@ def fortinet_test_2():
 
     options = {
         'algorithm': 'BinaryRelevance',
-        # 'encoder_type': 'OneHotEncoder',
-        # 'encoder': OneHotEncoder(handle_unknown='ignore'),
-        'encoder_type': 'OrdinalEncoder',
-        'encoder': OrdinalEncoder(encoded_missing_value=-1),
+        'encoder_type': 'OneHotEncoder',
+        'encoder': OneHotEncoder(handle_unknown='ignore'),
+        # 'encoder_type': 'OrdinalEncoder',
+        # 'encoder': OrdinalEncoder(encoded_missing_value=-1),
         # 'encoder_type': 'LabelEncoder',
         # 'encoder': LabelEncoder(),
         # 'algorithm': 'RandomForestClassifier',
         # 'text_processing': 'TITLE',
         # 'text_processing': 'Incident Title',
-        'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
+        # 'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
         'feature_attrs': [
             'Event Name',
             'Host IP',
@@ -356,13 +359,13 @@ def fortinet_test_2():
     for i in range(1000):
         # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
         output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
-        # print(i)
+        print(i)
 
     delta = datetime.now() - t0
 
     print(f'delta:{delta}')
 
 if __name__ == '__main__':
-    # fortinet_test()
-    fortinet_test_2()
+    fortinet_test_with_text_processing()
+    # fortinet_test_without_text_processing()
     # real_data_test()

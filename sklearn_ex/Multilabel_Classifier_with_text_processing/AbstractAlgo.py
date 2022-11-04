@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, \
-    recall_score, precision_score, roc_auc_score, hamming_loss
+    recall_score, precision_score, roc_auc_score, hamming_loss, classification_report
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
 from sklearn_ex.Multilabel_Classifier_with_text_processing.utils.const_utils import MODEL_TYPE_SINGLE
@@ -86,11 +86,20 @@ class AbstractClassifier(AbstractAlgo):
 
     def evaluate(self, model, y_true, y_pred, options=None):
         # Accuracy
-        acc = accuracy_score(y_true, y_pred)
+        # acc = accuracy_score(y_true.to_numpy(), y_pred)
 
         # Hamming Loss :Incorrect Predictions
         # The Lower the result the better
-        ham = hamming_loss(y_true, y_pred)
+        # ham = hamming_loss(y_true.to_numpy(), y_pred)
+
+        multilabel_classification_report = classification_report(
+            y_true,
+            y_pred,
+            output_dict=False,
+            target_names=y_true.columns
+        )
+
+        print(multilabel_classification_report)
 
         from sklearn.metrics import multilabel_confusion_matrix
         confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)
@@ -106,7 +115,7 @@ class AbstractClassifier(AbstractAlgo):
             }
             confusion_metrix_dict[columns[index]] = confusion
 
-        metrics = {"accuracy:": acc, "hamming_score": ham, "confusion_matrix": confusion_metrix_dict}
+        metrics = {"confusion_matrix": confusion_metrix_dict}
         print(f'metrics:{metrics}')
 
         '''
