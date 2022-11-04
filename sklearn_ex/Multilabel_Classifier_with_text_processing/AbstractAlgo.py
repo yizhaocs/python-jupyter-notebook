@@ -92,14 +92,15 @@ class AbstractClassifier(AbstractAlgo):
         # The Lower the result the better
         # ham = hamming_loss(y_true.to_numpy(), y_pred)
 
-        multilabel_classification_report = classification_report(
-            y_true,
-            y_pred,
-            output_dict=False,
-            target_names=y_true.columns
-        )
+        if len(y_true.columns) > 1:
+            multilabel_classification_report = classification_report(
+                y_true,
+                y_pred,
+                output_dict=False,
+                target_names=y_true.columns
+            )
 
-        print(multilabel_classification_report)
+            print(multilabel_classification_report)
 
         from sklearn.metrics import multilabel_confusion_matrix
         confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)

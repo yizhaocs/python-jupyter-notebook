@@ -233,7 +233,7 @@ def real_data_test():
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_inference.csv', index=False)
 
 
-def fortinet_test_with_text_processing():
+def fortinet_test_with_text_processing_for_user():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
     '''
@@ -302,7 +302,7 @@ def fortinet_test_with_text_processing():
 
     print(f'delta:{delta}')
 
-def fortinet_test_without_text_processing():
+def fortinet_test_without_text_processing_for_user():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
     '''
@@ -368,7 +368,150 @@ def fortinet_test_without_text_processing():
 
     print(f'delta:{delta}')
 
+
+
+def fortinet_test_with_text_processing_for_incident_resolution():
+    ''' This is used for algorithm level test, should be run at the same dir of this file.
+            python DecisionTreeClassifier.py
+    '''
+    import json
+
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
+
+    options = {
+        'algorithm': 'BinaryRelevance',
+        'encoder_type': 'OneHotEncoder',
+        'encoder': OneHotEncoder(handle_unknown='ignore'),
+        # 'encoder_type': 'OrdinalEncoder',
+        # 'encoder': OrdinalEncoder(encoded_missing_value=-1),
+        # 'encoder_type': 'LabelEncoder',
+        # 'encoder': LabelEncoder(),
+        # 'algorithm': 'RandomForestClassifier',
+        # 'text_processing': 'TITLE',
+        'text_processing': 'Incident Title',
+        'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
+        'feature_attrs': [
+            'Event Name',
+            'Host IP',
+            'Host Name',
+            'Incident Source',
+            'Incident Reporting Device',
+            'incident_target_parsed_hostName',
+            'incident_target_parsed_hostIpAddr',
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)',
+            'techniqueid'
+        ],
+        # 'target_attr': 'Incident Status',
+        'target_attr': ['Incident Resolution'],
+        'train_factor': 0.7
+    }
+
+    raw_data = fortinet_report_preprocessing(raw_data)
+    ##############################################################################################################
+
+    decisiontree_classification = Classifier_with_text_processing(options)
+
+    print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
+
+    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    print(output)
+    print(json.dumps(metrics, indent=2))
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
+
+    infer_data = raw_data.iloc[:, :]
+    # options.update({'model': pickle.dumps(model)})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: options['encoder']}})
+
+    t0 = datetime.now()
+
+    output = decisiontree_classification.infer(infer_data, options)
+
+    # x = infer_data.iloc[:1 + 10, :]
+    # for i in range(1000):
+    #     # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+    #     output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+    #     print(i)
+
+    delta = datetime.now() - t0
+
+    print(f'delta:{delta}')
+
+
+def fortinet_test_without_text_processing_for_incident_resolution():
+    ''' This is used for algorithm level test, should be run at the same dir of this file.
+            python DecisionTreeClassifier.py
+    '''
+    import json
+
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
+
+    options = {
+        'algorithm': 'BinaryRelevance',
+        'encoder_type': 'OneHotEncoder',
+        'encoder': OneHotEncoder(handle_unknown='ignore'),
+        # 'encoder_type': 'OrdinalEncoder',
+        # 'encoder': OrdinalEncoder(encoded_missing_value=-1),
+        # 'encoder_type': 'LabelEncoder',
+        # 'encoder': LabelEncoder(),
+        # 'algorithm': 'RandomForestClassifier',
+        # 'text_processing': 'TITLE',
+        # 'text_processing': 'Incident Title',
+        # 'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
+        'feature_attrs': [
+            'Event Name',
+            'Host IP',
+            'Host Name',
+            'Incident Source',
+            'Incident Reporting Device',
+            'incident_target_parsed_hostName',
+            'incident_target_parsed_hostIpAddr',
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)',
+            'techniqueid'
+        ],
+        # 'target_attr': 'Incident Status',
+        'target_attr': ['Incident Resolution'],
+        'train_factor': 0.7
+    }
+
+    raw_data = fortinet_report_preprocessing(raw_data)
+    ##############################################################################################################
+
+    decisiontree_classification = Classifier_with_text_processing(options)
+
+    print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
+
+    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    print(output)
+    print(json.dumps(metrics, indent=2))
+
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_training.csv', index=False)
+
+    infer_data = raw_data.iloc[:, :]
+    # options.update({'model': pickle.dumps(model)})
+    options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: options['encoder']}})
+
+    t0 = datetime.now()
+
+    output = decisiontree_classification.infer(infer_data, options)
+
+    # x = infer_data.iloc[:1 + 10, :]
+    # for i in range(1000):
+    #     # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+    #     output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+    #     print(i)
+
+    delta = datetime.now() - t0
+
+    print(f'delta:{delta}')
+
 if __name__ == '__main__':
-    fortinet_test_with_text_processing()
-    # fortinet_test_without_text_processing()
+    # fortinet_test_with_text_processing_for_user()
+    # fortinet_test_without_text_processing_for_user()
+    # fortinet_test_with_text_processing_for_incident_resolution()
+    fortinet_test_without_text_processing_for_incident_resolution()
     # real_data_test()
