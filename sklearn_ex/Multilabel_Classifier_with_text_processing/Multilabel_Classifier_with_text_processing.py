@@ -2,6 +2,7 @@ import pickle
 from datetime import datetime
 
 import pandas as pd
+from imblearn.ensemble import BalancedBaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
@@ -11,6 +12,10 @@ from skmultilearn.problem_transform import BinaryRelevance
 
 from sklearn_ex.Multilabel_Classifier_with_text_processing.AbstractAlgo import AbstractClassifier
 from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, FITTED_PARAMS, PRIDCT_NAME, DIFF_NAME, DECIMAL_PRECISION, ENCODER
+
+
+def _RandomForestClassifier(param):
+    pass
 
 
 class Classifier_with_text_processing(AbstractClassifier):
@@ -31,7 +36,12 @@ class Classifier_with_text_processing(AbstractClassifier):
                     3.Bernoulli NB: It should be used for features with binary or boolean values like True/False or 0/1.
             '''
             self.estimator = BinaryRelevance(GaussianNB())
-        else:
+        elif algorithm == 'BalancedBaggingClassifier':
+            self.estimator = BalancedBaggingClassifier(base_estimator=RandomForestClassifier(),
+                                                       sampling_strategy='auto',
+                                                       replacement=False,
+                                                       random_state=0)
+        elif algorithm == 'RandomForestClassifier':
             self.estimator = RandomForestClassifier()
 
     def text_preprocessing(self, df, options, mode):
@@ -64,7 +74,6 @@ class Classifier_with_text_processing(AbstractClassifier):
         categorical_feature_attrs = options['categorical_feature_attrs']
         numeric_feature_attrs = options['numeric_feature_attrs']
 
-
         target_attr = options['target_attr']
         if 'text_processing' in options:
             text_feature_data = self.text_preprocessing(df, options, 'train')
@@ -74,7 +83,6 @@ class Classifier_with_text_processing(AbstractClassifier):
         else:
             categorical_feature_data = df[categorical_feature_attrs]
             numeric_feature_data = df[numeric_feature_attrs]
-
 
         target_data = df[target_attr]
 
@@ -121,9 +129,9 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         metrics = None
         metrics = self.evaluate(self.estimator, pd.concat([
-                # pd.DataFrame(target_train),
-                pd.DataFrame(target_test)
-            ], axis=0), y_pred, options)
+            # pd.DataFrame(target_train),
+            pd.DataFrame(target_test)
+        ], axis=0), y_pred, options)
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
@@ -314,6 +322,7 @@ def fortinet_test_with_text_processing_for_user():
 
     print(f'delta:{delta}')
 
+
 def fortinet_test_without_text_processing_for_user():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
@@ -384,7 +393,6 @@ def fortinet_test_without_text_processing_for_user():
     # print(f'delta:{delta}')
 
 
-
 def fortinet_test_with_text_processing_for_incident_resolution():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
             python DecisionTreeClassifier.py
@@ -394,11 +402,11 @@ def fortinet_test_with_text_processing_for_incident_resolution():
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
     options = {
-        'algorithm': 'BinaryRelevance',
-        'encoder_type': 'OneHotEncoder',
-        'encoder': OneHotEncoder(handle_unknown='ignore'),
-        # 'encoder_type': 'OrdinalEncoder',
-        # 'encoder': OrdinalEncoder(encoded_missing_value=-1),
+        'algorithm': 'BalancedBaggingClassifier',
+        # 'encoder_type': 'OneHotEncoder',
+        # 'encoder': OneHotEncoder(handle_unknown='ignore'),
+        'encoder_type': 'OrdinalEncoder',
+        'encoder': OrdinalEncoder(encoded_missing_value=-1),
         # 'encoder_type': 'LabelEncoder',
         # 'encoder': LabelEncoder(),
         # 'algorithm': 'RandomForestClassifier',
@@ -466,11 +474,11 @@ def fortinet_test_without_text_processing_for_incident_resolution():
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
     options = {
-        'algorithm': 'BinaryRelevance',
-        'encoder_type': 'OneHotEncoder',
-        'encoder': OneHotEncoder(handle_unknown='ignore'),
-        # 'encoder_type': 'OrdinalEncoder',
-        # 'encoder': OrdinalEncoder(encoded_missing_value=-1),
+        'algorithm': 'BalancedBaggingClassifier',
+        # 'encoder_type': 'OneHotEncoder',
+        # 'encoder': OneHotEncoder(handle_unknown='ignore'),
+        'encoder_type': 'OrdinalEncoder',
+        'encoder': OrdinalEncoder(encoded_missing_value=-1),
         # 'encoder_type': 'LabelEncoder',
         # 'encoder': LabelEncoder(),
         # 'algorithm': 'RandomForestClassifier',
@@ -528,9 +536,10 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
     print(f'delta:{delta}')
 
+
 if __name__ == '__main__':
     # fortinet_test_with_text_processing_for_user()
-    fortinet_test_without_text_processing_for_user()
-    # fortinet_test_with_text_processing_for_incident_resolution()
+    # fortinet_test_without_text_processing_for_user()
+    fortinet_test_with_text_processing_for_incident_resolution()
     # fortinet_test_without_text_processing_for_incident_resolution()
     # real_data_test()
