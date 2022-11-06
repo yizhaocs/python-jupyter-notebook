@@ -61,16 +61,21 @@ class Classifier_with_text_processing(AbstractClassifier):
         return df_tfidfvect
 
     def train(self, df, options):
-        feature_attrs = options['feature_attrs']
+        categorical_feature_attrs = options['categorical_feature_attrs']
+        numeric_feature_attrs = options['numeric_feature_attrs']
+
+
         target_attr = options['target_attr']
         if 'text_processing' in options:
-            text_processing_attr = options['text_processing']
-            df_tfidfvect = self.text_preprocessing(df, options, 'train')
-            df = df.drop(text_processing_attr, axis=1)
-            feature_data = pd.concat([df, df_tfidfvect], axis=1)
-            feature_data.drop(target_attr, axis=1)
+            text_feature_data = self.text_preprocessing(df, options, 'train')
+            categorical_feature_data = df[categorical_feature_attrs]
+            numeric_feature_data = df[numeric_feature_attrs]
+
         else:
-            feature_data = df[feature_attrs]
+            categorical_feature_data = df[categorical_feature_attrs]
+            numeric_feature_data = df[numeric_feature_attrs]
+
+
         target_data = df[target_attr]
 
         ####################################################################################################
@@ -78,17 +83,22 @@ class Classifier_with_text_processing(AbstractClassifier):
         if 'encoder_type' in options:
             encoder = options['encoder']
             if options['encoder_type'] == 'OrdinalEncoder':
-                feature_data_with_encoding = encoder.fit_transform(feature_data)
+                feature_data_with_encoding = encoder.fit_transform(categorical_feature_data)
             elif options['encoder_type'] == 'LabelEncoder':
-                feature_data_with_encoding = feature_data.apply(encoder.fit_transform)
+                feature_data_with_encoding = categorical_feature_data.apply(encoder.fit_transform)
             elif options['encoder_type'] == 'OneHotEncoder':
-                feature_data_with_encoding = encoder.fit_transform(feature_data).toarray()
+                feature_data_with_encoding = encoder.fit_transform(categorical_feature_data).toarray()
+
+        feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
+        if 'text_processing' in options:
+            feature_data = pd.concat([feature_data, text_feature_data], axis=1)
+
         ####################################################################################################
 
-        print(f'feature_data_with_encoding.shape: {feature_data_with_encoding.shape}')
+        print(f'feature_data.shape: {feature_data.shape}')
         # 1. Split the data randomly with 70:30 of train and test.
         feature_train, feature_test, target_train, target_test = \
-            train_test_split(feature_data_with_encoding, target_data, random_state=42, shuffle=False,
+            train_test_split(feature_data, target_data, random_state=42, shuffle=False,
                              test_size=1 - float(options['train_factor']))
         self.ss_feature = StandardScaler()
         # 2. Standardlize the train and test data of features.
@@ -253,7 +263,12 @@ def fortinet_test_with_text_processing_for_user():
         # 'text_processing': 'TITLE',
         'text_processing': 'Incident Title',
         'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
-        'feature_attrs': [
+        'numeric_feature_attrs': [
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)'
+        ],
+        'categorical_feature_attrs': [
             'Event Name',
             'Host IP',
             'Host Name',
@@ -261,9 +276,6 @@ def fortinet_test_with_text_processing_for_user():
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'Incident Category',
-            'DayOfWeek(Event Receive Time)',
-            'HourOfDay(Event Receive Time)',
             'techniqueid'
         ],
         # 'target_attr': 'Incident Status',
@@ -322,7 +334,12 @@ def fortinet_test_without_text_processing_for_user():
         # 'text_processing': 'TITLE',
         # 'text_processing': 'Incident Title',
         # 'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
-        'feature_attrs': [
+        'numeric_feature_attrs': [
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)'
+        ],
+        'categorical_feature_attrs': [
             'Event Name',
             'Host IP',
             'Host Name',
@@ -330,9 +347,6 @@ def fortinet_test_without_text_processing_for_user():
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'Incident Category',
-            'DayOfWeek(Event Receive Time)',
-            'HourOfDay(Event Receive Time)',
             'techniqueid'
         ],
         # 'target_attr': 'Incident Status',
@@ -390,17 +404,19 @@ def fortinet_test_with_text_processing_for_incident_resolution():
         # 'text_processing': 'TITLE',
         'text_processing': 'Incident Title',
         'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
-        'feature_attrs': [
-            # 'Event Name',
-            # 'Host IP',
-            # 'Host Name',
-            # 'Incident Source',
-            # 'Incident Reporting Device',
-            # 'incident_target_parsed_hostName',
-            # 'incident_target_parsed_hostIpAddr',
-            # 'Incident Category',
-            # 'DayOfWeek(Event Receive Time)',
-            # 'HourOfDay(Event Receive Time)',
+        'numeric_feature_attrs': [
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)'
+        ],
+        'categorical_feature_attrs': [
+            'Event Name',
+            'Host IP',
+            'Host Name',
+            'Incident Source',
+            'Incident Reporting Device',
+            'incident_target_parsed_hostName',
+            'incident_target_parsed_hostIpAddr',
             'techniqueid'
         ],
         # 'target_attr': 'Incident Status',
@@ -460,7 +476,12 @@ def fortinet_test_without_text_processing_for_incident_resolution():
         # 'text_processing': 'TITLE',
         # 'text_processing': 'Incident Title',
         # 'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
-        'feature_attrs': [
+        'numeric_feature_attrs': [
+            'Incident Category',
+            'DayOfWeek(Event Receive Time)',
+            'HourOfDay(Event Receive Time)'
+        ],
+        'categorical_feature_attrs': [
             'Event Name',
             'Host IP',
             'Host Name',
@@ -468,9 +489,6 @@ def fortinet_test_without_text_processing_for_incident_resolution():
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'Incident Category',
-            'DayOfWeek(Event Receive Time)',
-            'HourOfDay(Event Receive Time)',
             'techniqueid'
         ],
         # 'target_attr': 'Incident Status',

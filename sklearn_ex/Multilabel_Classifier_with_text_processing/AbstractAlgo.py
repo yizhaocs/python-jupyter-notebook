@@ -149,29 +149,38 @@ class AbstractClassifier(AbstractAlgo):
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
         encoder = model_file[ENCODER]
-        feature_attrs = options['feature_attrs']
+        categorical_feature_attrs = options['categorical_feature_attrs']
+        numeric_feature_attrs = options['numeric_feature_attrs']
         target_attr = options['target_attr']
         if 'text_processing' in options:
-            text_processing_attr = options['text_processing']
-            df_tfidfvect = self.text_preprocessing(df, options, 'infer')
-            df = df.drop(text_processing_attr, axis=1)
-            feature_data = pd.concat([df, df_tfidfvect], axis=1)
-            feature_data.drop(target_attr, axis=1)
+            text_feature_data = self.text_preprocessing(df, options, 'train')
+            categorical_feature_data = df[categorical_feature_attrs]
+            numeric_feature_data = df[numeric_feature_attrs]
+            # text_processing_attr = options['text_processing']
+            # df_tfidfvect = self.text_preprocessing(df, options, 'infer')
+            # df = df.drop(text_processing_attr, axis=1)
+            # feature_data = pd.concat([df, df_tfidfvect], axis=1)
+            # feature_data.drop(target_attr, axis=1)
         else:
-            feature_data = df[feature_attrs]
+            categorical_feature_data = df[categorical_feature_attrs]
+            numeric_feature_data = df[numeric_feature_attrs]
 
 
         if 'encoder_type' in options:
             encoder = options['encoder']
             if options['encoder_type'] == 'OrdinalEncoder':
-                feature_data_with_encoding = encoder.transform(feature_data)
+                feature_data_with_encoding = encoder.transform(categorical_feature_data)
             elif options['encoder_type'] == 'LabelEncoder':
-                feature_data_with_encoding = feature_data.apply(encoder.fit_transform)
+                feature_data_with_encoding = categorical_feature_data.apply(encoder.fit_transform)
             elif options['encoder_type'] == 'OneHotEncoder':
-                feature_data_with_encoding = encoder.transform(feature_data).toarray()
+                feature_data_with_encoding = encoder.transform(categorical_feature_data).toarray()
 
+        # feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
+        feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
+        if 'text_processing' in options:
+            feature_data = pd.concat([feature_data, text_feature_data], axis=1)
 
-        ss_feature_data = self.ss_feature.fit_transform(feature_data_with_encoding)
+        ss_feature_data = self.ss_feature.fit_transform(feature_data)
         y_pred = model.predict(ss_feature_data)
         target_attr = options['target_attr']
         # output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
