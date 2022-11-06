@@ -111,7 +111,7 @@ class Classifier_with_text_processing(AbstractClassifier):
         # 4. Evaluate the model performance
         y_pred = self.estimator.predict(
             pd.concat([
-                pd.DataFrame(ss_feature_train),
+                # pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
         # Convert to Array  To See Result
@@ -121,7 +121,7 @@ class Classifier_with_text_processing(AbstractClassifier):
 
         metrics = None
         metrics = self.evaluate(self.estimator, pd.concat([
-                pd.DataFrame(target_train),
+                # pd.DataFrame(target_train),
                 pd.DataFrame(target_test)
             ], axis=0), y_pred, options)
 
@@ -371,16 +371,17 @@ def fortinet_test_without_text_processing_for_user():
     # options.update({'model': pickle.dumps(model)})
     options.update({'model': {MODEL_TYPE_SINGLE: model, ENCODER: options['encoder']}})
 
-    t0 = datetime.now()
-    # x = infer_data.iloc[:1 + 10, :]
-    for i in range(1000):
-        # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
-        output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
-        print(i)
+    output = decisiontree_classification.infer(infer_data, options)
+    # t0 = datetime.now()
+    # # x = infer_data.iloc[:1 + 10, :]
+    # for i in range(1000):
+    #     # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
+    #     output = decisiontree_classification.infer(infer_data.iloc[:i + 10, :], options)
+    #     print(i)
+    #
+    # delta = datetime.now() - t0
 
-    delta = datetime.now() - t0
-
-    print(f'delta:{delta}')
+    # print(f'delta:{delta}')
 
 
 
@@ -529,7 +530,7 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
 if __name__ == '__main__':
     # fortinet_test_with_text_processing_for_user()
-    # fortinet_test_without_text_processing_for_user()
+    fortinet_test_without_text_processing_for_user()
     # fortinet_test_with_text_processing_for_incident_resolution()
-    fortinet_test_without_text_processing_for_incident_resolution()
+    # fortinet_test_without_text_processing_for_incident_resolution()
     # real_data_test()
