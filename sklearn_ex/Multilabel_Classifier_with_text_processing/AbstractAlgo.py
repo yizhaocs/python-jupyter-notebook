@@ -156,11 +156,6 @@ class AbstractClassifier(AbstractAlgo):
             text_feature_data = self.text_preprocessing(df, options, 'train')
             categorical_feature_data = df[categorical_feature_attrs]
             numeric_feature_data = df[numeric_feature_attrs]
-            # text_processing_attr = options['text_processing']
-            # df_tfidfvect = self.text_preprocessing(df, options, 'infer')
-            # df = df.drop(text_processing_attr, axis=1)
-            # feature_data = pd.concat([df, df_tfidfvect], axis=1)
-            # feature_data.drop(target_attr, axis=1)
         else:
             categorical_feature_data = df[categorical_feature_attrs]
             numeric_feature_data = df[numeric_feature_attrs]
