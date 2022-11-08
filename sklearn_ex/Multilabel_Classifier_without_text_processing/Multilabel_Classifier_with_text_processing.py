@@ -1,3 +1,4 @@
+import copy
 import pickle
 from datetime import datetime
 
@@ -67,6 +68,7 @@ class Classifier_with_text_processing():
         return df_tfidfvect
 
     def train(self, df, options):
+        df = data_praser(df, options)
         feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
         numeric_feature_attrs = []
@@ -94,7 +96,6 @@ class Classifier_with_text_processing():
                 feature_data_with_encoding = encoder.fit_transform(categorical_feature_data).toarray()
 
         feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
-
 
         ####################################################################################################
 
@@ -204,6 +205,7 @@ class Classifier_with_text_processing():
         return metrics
 
     def infer(self, df, options):
+        df = data_praser(df, options)
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
         encoder = model[ENCODER]
@@ -248,7 +250,14 @@ class Classifier_with_text_processing():
         return output
 
 
-def fortinet_report_preprocessing(raw_data):
+def incident_target_column_parsing(raw_data, options):
+    feature_attrs = options['feature_attrs']
+    if 'Incident Target' not in feature_attrs:
+        return raw_data
+
+    feature_attrs.remove('Incident Target')
+    feature_attrs.append('incident_target_parsed_hostIpAddr')
+    feature_attrs.append('incident_target_parsed_hostName')
     ############################################################################################################################################
     incident_target_parsed = raw_data['Incident Target'].str.split(pat=',', expand=False)
     # print(incident_target_parsed.head())
@@ -278,7 +287,16 @@ def fortinet_report_preprocessing(raw_data):
 
     raw_data = pd.concat([raw_data, hostIpAddr_data_df], axis=1)
     raw_data = pd.concat([raw_data, hostName_data_df], axis=1)
+    return raw_data
     ############################################################################################################################################
+
+
+def attack_technique_column_parsing(raw_data, options):
+    feature_attrs = options['feature_attrs']
+    if 'Attack Technique' not in feature_attrs:
+        return raw_data
+    feature_attrs.remove('Attack Technique')
+    feature_attrs.append('techniqueid')
     attack_tactic_parsed = raw_data['Attack Technique'].str.split(pat=',', expand=False)
     techniqueid_data = []
 
@@ -305,51 +323,12 @@ def fortinet_report_preprocessing(raw_data):
     techniqueid_data_df = pd.DataFrame(techniqueid_data, columns=['techniqueid'])
     raw_data = pd.concat([raw_data, techniqueid_data_df], axis=1)
     print(f'raw_data.columns:{raw_data.columns}')
-    ##############################################################################################################
-    incident_status = raw_data['Incident Status']
-    incident_resolution = raw_data['Incident Resolution']
-    raw_data['Incident_Status_with_Incident_Resolution'] = incident_status.astype(str) + incident_resolution.astype(str)
     return raw_data
 
-
-def real_data_test():
-    ''' This is used for algorithm level test, should be run at the same dir of this file.
-            python DecisionTreeClassifier.py
-    '''
-    import json
-
-    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/Multi-Label_Classification_Dataset/train.csv')
-
-    options = {
-        'algorithm': 'BinaryRelevance',
-        # 'algorithm': 'RandomForestClassifier',
-        'text_processing': 'TITLE',
-        'feature_attrs': [
-            'ABSTRACT'
-        ],
-        # 'target_attr': 'Incident Status',
-        'target_attr': ['Computer Science', 'Physics', 'Mathematics', 'Statistics', 'Statistics', 'Quantitative Biology', 'Quantitative Finance'],
-        'train_factor': 0.7
-    }
-
-    ##############################################################################################################
-
-    decisiontree_classification = Classifier_with_text_processing(options)
-
-    model, output, metrics = decisiontree_classification.train(raw_data, options)
-    print(output)
-    print(json.dumps(metrics, indent=2))
-
-    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_training.csv', index=False)
-
-    infer_data = raw_data.iloc[:, :]
-    # options.update({'model': pickle.dumps(model)})
-    options.update({'model': {MODEL_TYPE_SINGLE: model}})
-    output = decisiontree_classification.infer(infer_data, options)
-    print(output)
-
-    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/real_data_inference.csv', index=False)
-
+def data_praser(raw_data, options):
+    raw_data = incident_target_column_parsing(raw_data, options)
+    raw_data = attack_technique_column_parsing(raw_data, options)
+    return raw_data
 
 def fortinet_test_without_text_processing_for_user():
     ''' This is used for algorithm level test, should be run at the same dir of this file.
@@ -359,7 +338,7 @@ def fortinet_test_without_text_processing_for_user():
 
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
-    options = {
+    raw_options = {
         'algorithm': 'BinaryRelevance',
         # 'encoder_type': 'OneHotEncoder',
         'encoder_type': 'OrdinalEncoder',
@@ -373,17 +352,15 @@ def fortinet_test_without_text_processing_for_user():
             'Host Name',
             'Incident Source',
             'Incident Reporting Device',
-            'incident_target_parsed_hostName',
-            'incident_target_parsed_hostIpAddr',
-            'techniqueid',
+            'Incident Target',
+            'Attack Technique',
             'Attack Tactic'
         ],
         # 'target_attr': 'Incident Status',
         'target_attr': ['user_A', 'user_B', 'user_C', 'user_D'],
         'train_factor': 0.7
     }
-
-    raw_data = fortinet_report_preprocessing(raw_data)
+    options = copy.deepcopy(raw_options)
     ##############################################################################################################
 
     decisiontree_classification = Classifier_with_text_processing(options)
@@ -398,6 +375,7 @@ def fortinet_test_without_text_processing_for_user():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
+    options = raw_options
     options.update({'model': {MODEL_TYPE_SINGLE: model}})
 
     output = decisiontree_classification.infer(infer_data, options)
@@ -422,7 +400,7 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
-    options = {
+    raw_options = {
         'algorithm': 'BalancedBaggingClassifier',
         # 'encoder_type': 'OneHotEncoder',
         'encoder_type': 'OrdinalEncoder',
@@ -436,17 +414,16 @@ def fortinet_test_without_text_processing_for_incident_resolution():
             'Host Name',
             'Incident Source',
             'Incident Reporting Device',
-            'incident_target_parsed_hostName',
-            'incident_target_parsed_hostIpAddr',
-            'techniqueid',
+            'Incident Target',
+            'Attack Technique',
             'Attack Tactic'
         ],
         # 'target_attr': 'Incident Status',
         'target_attr': ['Incident Resolution'],
         'train_factor': 0.7
     }
+    options = copy.deepcopy(raw_options)
 
-    raw_data = fortinet_report_preprocessing(raw_data)
     ##############################################################################################################
 
     decisiontree_classification = Classifier_with_text_processing(options)
@@ -461,11 +438,13 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
     infer_data = raw_data.iloc[:, :]
     # options.update({'model': pickle.dumps(model)})
+
+    options = raw_options
     options.update({'model': {MODEL_TYPE_SINGLE: model}})
 
     t0 = datetime.now()
 
-    output = decisiontree_classification.infer(infer_data, options)
+    output = decisiontree_classification.infer(infer_data, raw_options)
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
     # x = infer_data.iloc[:1 + 10, :]
     # for i in range(1000):
@@ -479,5 +458,5 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
 
 if __name__ == '__main__':
-    # fortinet_test_without_text_processing_for_user()
-    fortinet_test_without_text_processing_for_incident_resolution()
+    fortinet_test_without_text_processing_for_user()
+    # fortinet_test_without_text_processing_for_incident_resolution()
