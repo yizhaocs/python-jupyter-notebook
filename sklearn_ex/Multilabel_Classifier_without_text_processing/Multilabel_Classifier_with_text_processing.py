@@ -67,19 +67,19 @@ class Classifier_with_text_processing():
         return df_tfidfvect
 
     def train(self, df, options):
-        categorical_feature_attrs = options['categorical_feature_attrs']
-        numeric_feature_attrs = options['numeric_feature_attrs']
-
+        feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        if 'text_processing' in options:
-            text_feature_data = self.text_preprocessing(df, options, 'train')
-            categorical_feature_data = df[categorical_feature_attrs]
-            numeric_feature_data = df[numeric_feature_attrs]
+        numeric_feature_attrs = []
+        categorical_feature_attrs = []
+        for attr in feature_attrs:
+            e = df[attr][[0]].to_numpy()[0]
+            if e is not np.nan and (isinstance(e, np.integer) or isinstance(e, float)):
+                numeric_feature_attrs.append(attr)
+            else:
+                categorical_feature_attrs.append(attr)
 
-        else:
-            categorical_feature_data = df[categorical_feature_attrs]
-            numeric_feature_data = df[numeric_feature_attrs]
-
+        numeric_feature_data = df[numeric_feature_attrs]
+        categorical_feature_data = df[categorical_feature_attrs]
         target_data = df[target_attr]
 
         ####################################################################################################
@@ -94,8 +94,7 @@ class Classifier_with_text_processing():
                 feature_data_with_encoding = encoder.fit_transform(categorical_feature_data).toarray()
 
         feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
-        if 'text_processing' in options:
-            feature_data = pd.concat([feature_data, text_feature_data], axis=1)
+
 
         ####################################################################################################
 
@@ -208,16 +207,20 @@ class Classifier_with_text_processing():
         model_file = options['model']
         model = model_file[MODEL_TYPE_SINGLE]
         encoder = model[ENCODER]
-        categorical_feature_attrs = options['categorical_feature_attrs']
-        numeric_feature_attrs = options['numeric_feature_attrs']
+
+        feature_attrs = options['feature_attrs']
         target_attr = options['target_attr']
-        if 'text_processing' in options:
-            text_feature_data = self.text_preprocessing(df, options, 'train')
-            categorical_feature_data = df[categorical_feature_attrs]
-            numeric_feature_data = df[numeric_feature_attrs]
-        else:
-            categorical_feature_data = df[categorical_feature_attrs]
-            numeric_feature_data = df[numeric_feature_attrs]
+        numeric_feature_attrs = []
+        categorical_feature_attrs = []
+        for attr in feature_attrs:
+            e = df[attr][[0]].to_numpy()[0]
+            if e is not np.nan and (isinstance(e, np.integer) or isinstance(e, float)):
+                numeric_feature_attrs.append(attr)
+            else:
+                categorical_feature_attrs.append(attr)
+
+        numeric_feature_data = df[numeric_feature_attrs]
+        categorical_feature_data = df[categorical_feature_attrs]
 
         if 'encoder_type' in options:
             if options['encoder_type'] == 'OrdinalEncoder':
@@ -227,8 +230,6 @@ class Classifier_with_text_processing():
 
         # feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
         feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
-        if 'text_processing' in options:
-            feature_data = pd.concat([feature_data, text_feature_data], axis=1)
 
         ss_feature_data = self.ss_feature.fit_transform(feature_data)
         y_pred = model['algorithm'].predict(ss_feature_data)
@@ -363,12 +364,10 @@ def fortinet_test_without_text_processing_for_user():
         # 'encoder_type': 'OneHotEncoder',
         'encoder_type': 'OrdinalEncoder',
         # 'algorithm': 'RandomForestClassifier',
-        'numeric_feature_attrs': [
+        'feature_attrs': [
             'Incident Category',
             'DayOfWeek(Event Receive Time)',
-            'HourOfDay(Event Receive Time)'
-        ],
-        'categorical_feature_attrs': [
+            'HourOfDay(Event Receive Time)',
             'Event Name',
             'Host IP',
             'Host Name',
@@ -401,6 +400,7 @@ def fortinet_test_without_text_processing_for_user():
     options.update({'model': {MODEL_TYPE_SINGLE: model}})
 
     output = decisiontree_classification.infer(infer_data, options)
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
     # t0 = datetime.now()
     # # x = infer_data.iloc[:1 + 10, :]
     # for i in range(1000):
@@ -426,15 +426,10 @@ def fortinet_test_without_text_processing_for_incident_resolution():
         # 'encoder_type': 'OneHotEncoder',
         'encoder_type': 'OrdinalEncoder',
         # 'algorithm': 'RandomForestClassifier',
-        # 'text_processing': 'TITLE',
-        # 'text_processing': 'Incident Title',
-        # 'tfidf': TfidfVectorizer(analyzer='word', stop_words='english'),
-        'numeric_feature_attrs': [
+        'feature_attrs': [
             'Incident Category',
             'DayOfWeek(Event Receive Time)',
-            'HourOfDay(Event Receive Time)'
-        ],
-        'categorical_feature_attrs': [
+            'HourOfDay(Event Receive Time)',
             'Event Name',
             'Host IP',
             'Host Name',
@@ -469,7 +464,7 @@ def fortinet_test_without_text_processing_for_incident_resolution():
     t0 = datetime.now()
 
     output = decisiontree_classification.infer(infer_data, options)
-
+    output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
     # x = infer_data.iloc[:1 + 10, :]
     # for i in range(1000):
     #     # output = decisiontree_classification.infer(infer_data.iloc[[i]], options)
@@ -482,6 +477,6 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
 
 if __name__ == '__main__':
-    # fortinet_test_without_text_processing_for_user()
-    fortinet_test_without_text_processing_for_incident_resolution()
+    fortinet_test_without_text_processing_for_user()
+    # fortinet_test_without_text_processing_for_incident_resolution()
     # real_data_test()
