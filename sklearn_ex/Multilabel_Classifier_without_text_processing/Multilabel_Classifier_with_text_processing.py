@@ -481,4 +481,3 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 if __name__ == '__main__':
     # fortinet_test_without_text_processing_for_user()
     fortinet_test_without_text_processing_for_incident_resolution()
-    # real_data_test()
