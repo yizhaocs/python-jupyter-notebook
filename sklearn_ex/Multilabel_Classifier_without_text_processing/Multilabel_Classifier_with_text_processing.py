@@ -114,7 +114,7 @@ class Classifier_with_text_processing():
         # 4. Evaluate the model performance
         y_pred = self.estimator['algorithm'].predict(
             pd.concat([
-                # pd.DataFrame(ss_feature_train),
+                pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
         # Convert to Array  To See Result
@@ -124,7 +124,7 @@ class Classifier_with_text_processing():
 
         metrics = None
         metrics = self.evaluate(self.estimator['algorithm'], pd.concat([
-            # pd.DataFrame(target_train),
+            pd.DataFrame(target_train),
             pd.DataFrame(target_test)
         ], axis=0), y_pred, options)
 
@@ -375,7 +375,8 @@ def fortinet_test_without_text_processing_for_user():
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'techniqueid'
+            'techniqueid',
+            'Attack Tactic'
         ],
         # 'target_attr': 'Incident Status',
         'target_attr': ['user_A', 'user_B', 'user_C', 'user_D'],
@@ -437,7 +438,8 @@ def fortinet_test_without_text_processing_for_incident_resolution():
             'Incident Reporting Device',
             'incident_target_parsed_hostName',
             'incident_target_parsed_hostIpAddr',
-            'techniqueid'
+            'techniqueid',
+            'Attack Tactic'
         ],
         # 'target_attr': 'Incident Status',
         'target_attr': ['Incident Resolution'],
@@ -477,6 +479,6 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
 
 if __name__ == '__main__':
-    fortinet_test_without_text_processing_for_user()
-    # fortinet_test_without_text_processing_for_incident_resolution()
+    # fortinet_test_without_text_processing_for_user()
+    fortinet_test_without_text_processing_for_incident_resolution()
     # real_data_test()
