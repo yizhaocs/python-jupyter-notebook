@@ -8,6 +8,7 @@ from sklearn.metrics import max_error, r2_score, mean_squared_error, mean_absolu
 from sklearn.preprocessing import StandardScaler
 from collections import OrderedDict
 
+from sklearn_ex.fortinet_BalancedBaggingClassifier.utils.parsing_utils import data_praser
 from sklearn_ex.utils.const_utils import ENCODER
 from utils.const_utils import *
 from utils.excp_utils import phMLNotImplError
@@ -225,6 +226,7 @@ class AbstractClassifier(AbstractAlgo):
             output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
             return output
         else:
+            df = data_praser(df, options)
             model_file = options['model']
             model = model_file[MODEL_TYPE_SINGLE]
             encoder = model[ENCODER]
