@@ -6,13 +6,13 @@ import numpy as np
 import pandas as pd
 from imblearn.ensemble import BalancedBaggingClassifier as _BalancedBaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, f1_score, recall_score, precision_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from skmultilearn.problem_transform import BinaryRelevance
 
-from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, ENCODER
+from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, ENCODER, DECIMAL_PRECISION, FITTED_ERRORS
 from sklearn_ex.utils.param_utils import parse_params
 
 
@@ -52,16 +52,8 @@ class BalancedBaggingClassifier():
         target_data = df[target_attr]
 
         ####################################################################################################
-
-        if 'encoder_type' in options:
-            encoder = self.estimator['encoder']
-            if options['encoder_type'] == 'OrdinalEncoder':
-                feature_data_with_encoding = encoder.fit_transform(categorical_feature_data)
-            elif options['encoder_type'] == 'LabelEncoder':
-                feature_data_with_encoding = categorical_feature_data.apply(encoder.fit_transform)
-            elif options['encoder_type'] == 'OneHotEncoder':
-                feature_data_with_encoding = encoder.fit_transform(categorical_feature_data).toarray()
-
+        encoder = self.estimator['encoder']
+        feature_data_with_encoding = encoder.fit_transform(categorical_feature_data)
         feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
 
         ####################################################################################################
@@ -82,19 +74,10 @@ class BalancedBaggingClassifier():
         # 4. Evaluate the model performance
         y_pred = self.estimator['algorithm'].predict(
             pd.concat([
-                # pd.DataFrame(ss_feature_train),
+                pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
-        # Convert to Array  To See Result
-
-        if options['algorithm'] == 'BinaryRelevance':
-            y_pred = y_pred.toarray()
-
-        metrics = None
-        metrics = self.evaluate(self.estimator['algorithm'], pd.concat([
-            # pd.DataFrame(target_train),
-            pd.DataFrame(target_test)
-        ], axis=0), y_pred, options)
+        metrics = self.evaluate(target_data, y_pred)
 
         # feature_import = list(self.estimator.feature_importances_.round(DECIMAL_PRECISION))
         # fitted_parameter = {feature_attrs[i]: feature_import[i] for i in range(len(feature_attrs))}
@@ -110,65 +93,35 @@ class BalancedBaggingClassifier():
 
         return self.estimator, output, metrics
 
-    def evaluate(self, model, y_true, y_pred, options=None):
-        # Accuracy
-        # acc = accuracy_score(y_true.to_numpy(), y_pred)
+    def evaluate(self, y_true, y_pred):
+        labels = y_true.iloc[:, 0].unique()
+        from sklearn.metrics import multilabel_confusion_matrix, classification_report
+        confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
+        classification_report = classification_report(y_true, y_pred, labels=labels, output_dict=True)
+        # print(classification_report)
 
-        # Hamming Loss :Incorrect Predictions
-        # The Lower the result the better
-        # ham = hamming_loss(y_true.to_numpy(), y_pred)
-
-        if len(y_true.columns) > 1:
-            multilabel_classification_report = classification_report(
-                y_true,
-                y_pred,
-                output_dict=False,
-                target_names=y_true.columns
-            )
-
-            print(multilabel_classification_report)
-
-        from sklearn.metrics import multilabel_confusion_matrix
-        confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)
-        columns = y_true.columns
         confusion_metrix_dict = {}
-        for index in range(len(columns)):
-            single_confusion = confusion_matrix[index]
+        for label_col in range(len(labels)):
+            confusion_matrix = confusion_matrix_with_labels[label_col]
             confusion = {
-                "True Negative": int(single_confusion[0, 0]),
-                "False Positive": int(single_confusion[0, 1]),
-                "False Negative": int(single_confusion[1, 0]),
-                "True Positive": int(single_confusion[1, 1])
+                "True Negative": int(confusion_matrix[0, 0]),
+                "False Positive": int(confusion_matrix[0, 1]),
+                "False Negative": int(confusion_matrix[1, 0]),
+                "True Positive": int(confusion_matrix[1, 1])
             }
-            confusion_metrix_dict[columns[index]] = confusion
+            confusion_metrix_dict[labels[label_col]] = confusion
 
-        metrics = {"confusion_matrix": confusion_metrix_dict}
+        # for label, matrix in confusion_metrix_dict.items():
+        #     print("Confusion matrix for label {}:".format(label))
+        #     print(matrix)
+
+        errors = {
+            'Labels': labels.tolist(),
+            'Classification Report': classification_report,
+            'Confusion': confusion_metrix_dict
+        }
+        metrics = {FITTED_ERRORS: errors}
         print(f'metrics:{metrics}')
-
-        '''
-            Feature ranking
-        '''
-        if options['algorithm'] == 'RandomForestClassifier':
-            importances = model.feature_importances_
-            std = np.std([tree.feature_importances_ for tree in model.estimators_], axis=0)
-            indices = np.argsort(importances)[::-1]
-
-            # Print the feature ranking
-            print("Feature ranking:")
-
-            for f in range(0, 27):
-                print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
-
-        '''
-            Each label accuracy
-        '''
-        y_pred = pd.DataFrame(y_pred, columns=options['target_attr'])
-        for label in options['target_attr']:
-            print('\n')
-            print('... Processing {}'.format(label))
-
-            # Checking overall accuracy
-            print('Testing Accuracy is {}'.format(accuracy_score(y_true[label], y_pred[label])))
         return metrics
 
     def infer(self, df, options):
