@@ -12,11 +12,12 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from skmultilearn.problem_transform import BinaryRelevance
 
+from sklearn_ex.fortinet_BalancedBaggingClassifier.AbstractAlgo import AbstractClassifier
 from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, ENCODER, DECIMAL_PRECISION, FITTED_ERRORS
 from sklearn_ex.utils.param_utils import parse_params
 
 
-class BalancedBaggingClassifier():
+class BalancedBaggingClassifier(AbstractClassifier):
 
     def __init__(self, options):
         self.ss_feature = StandardScaler()
@@ -92,37 +93,6 @@ class BalancedBaggingClassifier():
         output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
 
         return self.estimator, output, metrics
-
-    def evaluate(self, y_true, y_pred):
-        labels = y_true.iloc[:, 0].unique()
-        from sklearn.metrics import multilabel_confusion_matrix, classification_report
-        confusion_matrix_with_labels = multilabel_confusion_matrix(y_true, y_pred, labels=labels)
-        classification_report = classification_report(y_true, y_pred, labels=labels, output_dict=True)
-        # print(classification_report)
-
-        confusion_metrix_dict = {}
-        for label_col in range(len(labels)):
-            confusion_matrix = confusion_matrix_with_labels[label_col]
-            confusion = {
-                "True Negative": int(confusion_matrix[0, 0]),
-                "False Positive": int(confusion_matrix[0, 1]),
-                "False Negative": int(confusion_matrix[1, 0]),
-                "True Positive": int(confusion_matrix[1, 1])
-            }
-            confusion_metrix_dict[labels[label_col]] = confusion
-
-        # for label, matrix in confusion_metrix_dict.items():
-        #     print("Confusion matrix for label {}:".format(label))
-        #     print(matrix)
-
-        errors = {
-            'Labels': labels.tolist(),
-            'Classification Report': classification_report,
-            'Confusion': confusion_metrix_dict
-        }
-        metrics = {FITTED_ERRORS: errors}
-        print(f'metrics:{metrics}')
-        return metrics
 
     def infer(self, df, options):
         df = data_praser(df, options)
@@ -241,7 +211,6 @@ def attack_technique_column_parsing(raw_data, options):
                         techniqueid_tmp = re.sub(pattern, '', techniqueid_tmp)
                         techniqueid = techniqueid + ',' + techniqueid_tmp
 
-                    # print(f'techniqueid:{s}')
             techniqueid_data.append(techniqueid)
         else:
             techniqueid_data.append(pd.np.nan)
@@ -291,7 +260,7 @@ def fortinet_test_without_text_processing_for_user():
     options = copy.deepcopy(raw_options)
     ##############################################################################################################
 
-    decisiontree_classification = Classifier_with_text_processing(options)
+    decisiontree_classification = BalancedBaggingClassifier(options)
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
 
