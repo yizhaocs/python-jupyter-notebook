@@ -161,10 +161,6 @@ def fortinet_test_without_text_processing_for_incident_resolution():
     raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/fortinet_reports/report1666743279291_with_incident_title_with_username.csv')
 
     raw_options = {
-        'algorithm': 'BalancedBaggingClassifier',
-        # 'encoder_type': 'OneHotEncoder',
-        'encoder_type': 'OrdinalEncoder',
-        # 'algorithm': 'RandomForestClassifier',
         'feature_attrs': [
             'Incident Category',
             'DayOfWeek(Event Receive Time)',
@@ -178,7 +174,6 @@ def fortinet_test_without_text_processing_for_incident_resolution():
             'Attack Technique',
             'Attack Tactic'
         ],
-        # 'target_attr': 'Incident Status',
         'target_attr': ['Incident Resolution'],
         'train_factor': 0.7
     }

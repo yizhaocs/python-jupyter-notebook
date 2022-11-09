@@ -256,8 +256,6 @@ class AbstractClassifier(AbstractAlgo):
             for index in range(len(columns)):
                 predict_columns.append(columns[index] + '_predicted')
 
-            if options['algorithm'] == 'BinaryRelevance':
-                y_pred = y_pred.toarray()
             output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
 
             return output
