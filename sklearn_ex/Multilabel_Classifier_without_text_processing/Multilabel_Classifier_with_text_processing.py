@@ -115,7 +115,7 @@ class Classifier_with_text_processing():
         # 4. Evaluate the model performance
         y_pred = self.estimator['algorithm'].predict(
             pd.concat([
-                pd.DataFrame(ss_feature_train),
+                # pd.DataFrame(ss_feature_train),
                 pd.DataFrame(ss_feature_test)
             ], axis=0))
         # Convert to Array  To See Result
@@ -125,7 +125,7 @@ class Classifier_with_text_processing():
 
         metrics = None
         metrics = self.evaluate(self.estimator['algorithm'], pd.concat([
-            pd.DataFrame(target_train),
+            # pd.DataFrame(target_train),
             pd.DataFrame(target_test)
         ], axis=0), y_pred, options)
 
@@ -304,19 +304,25 @@ def attack_technique_column_parsing(raw_data, options):
         e = attack_tactic_parsed.iloc[i]
         if e and isinstance(e, list):
             # print(f'e:{e}')
+            techniqueid = None
             for i in range(0, len(e)):
                 s = e[i]
                 if 'techniqueid' in s:
                     import re
 
-                    techniqueid = s.partition(':')[2]
+                    techniqueid_tmp = s.partition(':')[2]
 
                     list_of_char = ['\"', '}', '\]', ' ']
                     pattern = '[' + ''.join(list_of_char) + ']'
-                    techniqueid = re.sub(pattern, '', techniqueid)
-                    techniqueid_data.append(techniqueid)
-                    break
+                    if techniqueid is None:
+                        techniqueid_tmp = re.sub(pattern, '', techniqueid_tmp)
+                        techniqueid = techniqueid_tmp
+                    else:
+                        techniqueid_tmp = re.sub(pattern, '', techniqueid_tmp)
+                        techniqueid = techniqueid + ',' + techniqueid_tmp
+
                     # print(f'techniqueid:{s}')
+            techniqueid_data.append(techniqueid)
         else:
             techniqueid_data.append(pd.np.nan)
 
@@ -458,5 +464,5 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
 
 if __name__ == '__main__':
-    fortinet_test_without_text_processing_for_user()
-    # fortinet_test_without_text_processing_for_incident_resolution()
+    # fortinet_test_without_text_processing_for_user()
+    fortinet_test_without_text_processing_for_incident_resolution()
