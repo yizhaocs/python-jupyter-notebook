@@ -29,10 +29,11 @@ class Classifier_with_text_processing():
             }
         elif algorithm == 'BalancedBaggingClassifier':
             self.estimator = {
-                "algorithm": BalancedBaggingClassifier(base_estimator=RandomForestClassifier(),
-                                                       sampling_strategy='auto',
-                                                       replacement=False,
-                                                       random_state=0),
+                "algorithm": BalancedBaggingClassifier(),
+                # "algorithm": BalancedBaggingClassifier(base_estimator=RandomForestClassifier(),
+                #                                        sampling_strategy='auto',
+                #                                        replacement=False,
+                #                                        random_state=0),
                 "encoder": encoder
             }
         elif algorithm == 'RandomForestClassifier':
