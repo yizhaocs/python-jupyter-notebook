@@ -5,15 +5,11 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 from imblearn.ensemble import BalancedBaggingClassifier as _BalancedBaggingClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score, f1_score, recall_score, precision_score, roc_auc_score
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
-from skmultilearn.problem_transform import BinaryRelevance
 
 from sklearn_ex.fortinet_BalancedBaggingClassifier.AbstractAlgo import AbstractClassifier
-from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE, ENCODER, DECIMAL_PRECISION, FITTED_ERRORS
+from sklearn_ex.utils.const_utils import MODEL_TYPE_SINGLE
 from sklearn_ex.utils.param_utils import parse_params
 
 
@@ -90,50 +86,6 @@ class BalancedBaggingClassifier(AbstractClassifier):
 
         return self.estimator, output, metrics
 
-    def infer(self, df, options):
-        df = data_praser(df, options)
-        model_file = options['model']
-        model = model_file[MODEL_TYPE_SINGLE]
-        encoder = model[ENCODER]
-
-        feature_attrs = options['feature_attrs']
-        target_attr = options['target_attr']
-        numeric_feature_attrs = []
-        categorical_feature_attrs = []
-        for attr in feature_attrs:
-            e = df[attr][[0]].to_numpy()[0]
-            if e is not np.nan and (isinstance(e, np.integer) or isinstance(e, float)):
-                numeric_feature_attrs.append(attr)
-            else:
-                categorical_feature_attrs.append(attr)
-
-        numeric_feature_data = df[numeric_feature_attrs]
-        categorical_feature_data = df[categorical_feature_attrs]
-
-        if 'encoder_type' in options:
-            if options['encoder_type'] == 'OrdinalEncoder':
-                feature_data_with_encoding = encoder.transform(categorical_feature_data)
-            elif options['encoder_type'] == 'OneHotEncoder':
-                feature_data_with_encoding = encoder.transform(categorical_feature_data).toarray()
-
-        # feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
-        feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
-
-        ss_feature_data = self.ss_feature.fit_transform(feature_data)
-        y_pred = model['algorithm'].predict(ss_feature_data)
-        target_attr = options['target_attr']
-        # output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
-
-        columns = options['target_attr']
-        predict_columns = []
-        for index in range(len(columns)):
-            predict_columns.append(columns[index] + '_predicted')
-
-        if options['algorithm'] == 'BinaryRelevance':
-            y_pred = y_pred.toarray()
-        output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
-
-        return output
 
 
 def incident_target_column_parsing(raw_data, options):
@@ -319,11 +271,11 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
     ##############################################################################################################
 
-    decisiontree_classification = BalancedBaggingClassifier(options)
+    balanced_bagging_classification = BalancedBaggingClassifier(options)
 
     print(f"raw_data[Incident Resolution].value_counts():{raw_data['Incident Resolution'].value_counts()}")
 
-    model, output, metrics = decisiontree_classification.train(raw_data, options)
+    model, output, metrics = balanced_bagging_classification.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
 
@@ -337,7 +289,7 @@ def fortinet_test_without_text_processing_for_incident_resolution():
 
     t0 = datetime.now()
 
-    output = decisiontree_classification.infer(infer_data, raw_options)
+    output = balanced_bagging_classification.infer(data_praser(infer_data, options), raw_options)
     output.to_csv('/Users/yzhao/Documents/ai_for_operational_management/ai_for_operational_management_inference.csv', index=False)
     # x = infer_data.iloc[:1 + 10, :]
     # for i in range(1000):

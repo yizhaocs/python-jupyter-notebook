@@ -7,6 +7,8 @@ from sklearn.metrics import max_error, r2_score, mean_squared_error, mean_absolu
     recall_score, precision_score, roc_auc_score, silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.preprocessing import StandardScaler
 from collections import OrderedDict
+
+from sklearn_ex.utils.const_utils import ENCODER
 from utils.const_utils import *
 from utils.excp_utils import phMLNotImplError
 
@@ -164,7 +166,7 @@ class AbstractClassifier(AbstractAlgo):
 
     def evaluate(self, y_true, y_pred):
         labels = y_true.iloc[:, 0].unique()
-        if len(labels) == 2: # true if binary classification
+        if len(labels) == 2:  # true if binary classification
             confusion_matrix = pd.crosstab(y_true, y_pred, rownames=['Actual'], colnames=['Predicted'])
             confusion = {
                 "True Negative": int(confusion_matrix.iloc[0, 0]),
@@ -210,17 +212,53 @@ class AbstractClassifier(AbstractAlgo):
             metrics = {FITTED_ERRORS: errors}
             return metrics
 
-
     def infer(self, df, options):
-        model_file = options['model']
-        model = model_file[MODEL_TYPE_SINGLE]
-        feature_attrs = options['feature_attrs']
-        feature_data = df[feature_attrs]
-        ss_feature_data = self.ss_feature.fit_transform(feature_data)
-        y_pred = model.predict(ss_feature_data)
-        target_attr = options['target_attr']
-        output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
-        return output
+        labels = df[options['target_attr']].iloc[:, 0].unique()
+        if len(labels) == 2:  # true if binary classification
+            model_file = options['model']
+            model = model_file[MODEL_TYPE_SINGLE]
+            feature_attrs = options['feature_attrs']
+            feature_data = df[feature_attrs]
+            ss_feature_data = self.ss_feature.fit_transform(feature_data)
+            y_pred = model.predict(ss_feature_data)
+            target_attr = options['target_attr']
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=[f"{PRIDCT_NAME}({target_attr})"])], axis=1)
+            return output
+        else:
+            model_file = options['model']
+            model = model_file[MODEL_TYPE_SINGLE]
+            encoder = model[ENCODER]
+
+            feature_attrs = options['feature_attrs']
+            numeric_feature_attrs = []
+            categorical_feature_attrs = []
+            for attr in feature_attrs:
+                e = df[attr][[0]].to_numpy()[0]
+                if e is not np.nan and (isinstance(e, np.integer) or isinstance(e, float)):
+                    numeric_feature_attrs.append(attr)
+                else:
+                    categorical_feature_attrs.append(attr)
+
+            numeric_feature_data = df[numeric_feature_attrs]
+            categorical_feature_data = df[categorical_feature_attrs]
+
+            feature_data_with_encoding = encoder.transform(categorical_feature_data)
+
+            feature_data = pd.concat([pd.DataFrame(feature_data_with_encoding), numeric_feature_data], axis=1)
+
+            ss_feature_data = self.ss_feature.fit_transform(feature_data)
+            y_pred = model['algorithm'].predict(ss_feature_data)
+
+            columns = options['target_attr']
+            predict_columns = []
+            for index in range(len(columns)):
+                predict_columns.append(columns[index] + '_predicted')
+
+            if options['algorithm'] == 'BinaryRelevance':
+                y_pred = y_pred.toarray()
+            output = pd.concat([df, pd.DataFrame(y_pred, columns=predict_columns)], axis=1).reset_index(drop=True)
+
+            return output
 
 
 class AbstractCluster(AbstractAlgo):
@@ -303,5 +341,3 @@ class AbstractAnomalyDetection(AbstractAlgo):
         output = pd.concat([df, y_pred_df], axis=1).reset_index(drop=True)
 
         return output
-
-
