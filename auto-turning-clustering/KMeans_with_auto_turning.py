@@ -6,7 +6,8 @@ import sys
 
 import sklearn
 from sklearn.datasets import load_iris
-from sklearn.metrics._scorer import adjusted_rand_scorer
+from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics._scorer import adjusted_rand_scorer, make_scorer
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -47,7 +48,10 @@ class KMeansWithAutoTurning(AbstractCluster):
                           'init': ['k-means++', 'random'],
                           'tol': [1e-4, 1e-3, 1e-2]}
             # scoring = ['adjusted_rand_score']
-            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=scoring, refit='adjusted_rand_score')
+            # scorers = {
+            #     'adjusted_rand_score': make_scorer(adjusted_rand_score),
+            # }
+            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=scorers, refit=scorers)
             self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
