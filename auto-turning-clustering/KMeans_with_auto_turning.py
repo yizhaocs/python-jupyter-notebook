@@ -4,7 +4,9 @@ import pickle
 import os
 import sys
 
+import sklearn
 from sklearn.datasets import load_iris
+from sklearn.metrics._scorer import adjusted_rand_scorer
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -44,8 +46,9 @@ class KMeansWithAutoTurning(AbstractCluster):
                           'max_iter': [100, 200, 300],
                           'init': ['k-means++', 'random'],
                           'tol': [1e-4, 1e-3, 1e-2]}
+            # scoring = ['adjusted_rand_score']
+            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=scoring, refit='adjusted_rand_score')
             self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
-
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
@@ -74,7 +77,8 @@ class KMeansWithAutoTurning(AbstractCluster):
             fitted_parameter = {
                 'num_cluster': len(cluster_centers),
                 'cluster_centers': centers,
-                '_intertia': self.estimator.best_estimator_.inertia_
+                '_intertia': self.estimator.best_estimator_.inertia_,
+                'best_score': self.estimator.best_score_
             }
 
         metrics[FITTED_PARAMS] = fitted_parameter
