@@ -47,11 +47,7 @@ class KMeansWithAutoTurning(AbstractCluster):
                           'max_iter': [100, 200, 300],
                           'init': ['k-means++', 'random'],
                           'tol': [1e-4, 1e-3, 1e-2]}
-            # scoring = ['adjusted_rand_score']
-            # scorers = {
-            #     'adjusted_rand_score': make_scorer(adjusted_rand_score),
-            # }
-            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=scorers, refit=scorers)
+            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring='adjusted_rand_score')
             self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
@@ -82,7 +78,8 @@ class KMeansWithAutoTurning(AbstractCluster):
                 'num_cluster': len(cluster_centers),
                 'cluster_centers': centers,
                 '_intertia': self.estimator.best_estimator_.inertia_,
-                'best_score': self.estimator.best_score_
+                'best_score_': self.estimator.best_score_,
+                'best_params_': self.estimator.best_params_
             }
 
         metrics[FITTED_PARAMS] = fitted_parameter
@@ -90,7 +87,10 @@ class KMeansWithAutoTurning(AbstractCluster):
         # 4. Handle the return value, store the model into cache
         output = pd.concat([df, pd.DataFrame(y_labels, columns=[CLUTER_NAME])], axis=1)
 
-        return {MODEL_TYPE_SINGLE: self.estimator}, output, metrics
+        if not options.get('is_tune', False):
+            return {MODEL_TYPE_SINGLE: self.estimator}, output, metrics
+        else:
+            return {MODEL_TYPE_SINGLE: self.estimator.best_estimator_}, output, metrics
 
     def infer(self, df, options):
         model_file = options['model']
