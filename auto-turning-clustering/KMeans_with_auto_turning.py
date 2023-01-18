@@ -184,7 +184,7 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    # host_health_test(False)
-    # host_health_test(True)
+    host_health_test(False)
+    host_health_test(True)
     # test_iris(False)
-    test_iris(True)
+    # test_iris(True)
