@@ -6,7 +6,7 @@ import sys
 
 import sklearn
 from sklearn.datasets import load_iris
-from sklearn.metrics import adjusted_rand_score
+from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.metrics._scorer import adjusted_rand_scorer, make_scorer
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,13 +42,15 @@ class KMeansWithAutoTurning(AbstractCluster):
             )
             self.estimator = _KMeans(**input_params)
         else:
-            param_grid = {'n_clusters': [2, 3, 4, 5, 6, 7, 8],
-                          'n_init': [10, 20, 30],
-                          'max_iter': [100, 200, 300],
+            param_grid = {
+                          'n_clusters': range(2, 11),
+                          'n_init': [10, 20, 30, 40, 50],
+                          'max_iter': [100, 200, 300, 400, 500],
                           'init': ['k-means++', 'random'],
                           'tol': [1e-4, 1e-3, 1e-2]}
-            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring='adjusted_rand_score')
-            self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
+
+            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=silhouette_score)
+            self.estimator = GridSearchCV(_KMeans(), param_grid)
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
@@ -179,5 +181,5 @@ if __name__ == '__main__':
     '''
     # host_health_test(False)
     # host_health_test(True)
-    test_iris(False)
+    # test_iris(False)
     test_iris(True)
