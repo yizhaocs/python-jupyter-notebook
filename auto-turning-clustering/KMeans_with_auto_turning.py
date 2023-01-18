@@ -49,15 +49,21 @@ class KMeansWithAutoTurning(AbstractCluster):
                           'init': ['k-means++', 'random'],
                           'tol': [1e-4, 1e-3, 1e-2]}
 
-            self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=silhouette_score)
             # self.estimator = GridSearchCV(_KMeans(), param_grid)
+            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
+
+            def silhouette_score(estimator, X):
+                labels = estimator.fit_predict(X)
+                score = sklearn.metrics.silhouette_score(X, labels, metric='euclidean')
+                return score
+            self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=silhouette_score)
+
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
 
         # 1. Standardlize the train and test data of features.
         ss_feature_train = self.ss_feature.fit_transform(feature_data)
-
         # 2. Train the model with KMeans
         self.estimator.fit(ss_feature_train)
         # 3. Evaluate the model performance
