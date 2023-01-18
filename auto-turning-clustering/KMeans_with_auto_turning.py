@@ -5,7 +5,7 @@ import os
 import sys
 
 import sklearn
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, make_blobs
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.metrics._scorer import adjusted_rand_scorer, make_scorer
 
@@ -49,8 +49,8 @@ class KMeansWithAutoTurning(AbstractCluster):
                           'init': ['k-means++', 'random'],
                           'tol': [1e-4, 1e-3, 1e-2]}
 
-            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=silhouette_score)
-            self.estimator = GridSearchCV(_KMeans(), param_grid)
+            self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=silhouette_score)
+            # self.estimator = GridSearchCV(_KMeans(), param_grid)
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
@@ -60,7 +60,6 @@ class KMeansWithAutoTurning(AbstractCluster):
 
         # 2. Train the model with KMeans
         self.estimator.fit(ss_feature_train)
-
         # 3. Evaluate the model performance
         y_labels = self.estimator.predict(ss_feature_train)
         metrics = self.evaluate(ss_feature_train, y_labels)
