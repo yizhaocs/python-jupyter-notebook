@@ -40,9 +40,14 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
             self.estimator = _SpectralClustering(**out_params)
         else:
             param_grid = {'n_clusters': range(2, 11),
-                          'affinity': ['nearest_neighbors', 'rbf'],
+                          'affinity': ['nearest_neighbors', 'rbf', 'poly'],
+                          'assign_labels': ['kmeans', 'discretize'],
                           'n_neighbors': [5, 10, 15],
-                          'gamma': [0.01, 0.1, 1]}
+                          'gamma': [0.01, 0.1, 1],
+                          'degree': [2, 3],
+                          'coef0': [0, 1]
+                          }
+
             def silhouette_score(estimator, X):
                 estimator.fit(X)
                 cluster_labels = estimator.labels_
@@ -53,6 +58,7 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
                 else:
                     score = sklearn.metrics.silhouette_score(X, cluster_labels)
                 return score
+
             self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
 
     def train(self, df, options):
@@ -62,7 +68,6 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
 
         # 1. Standardlize the train and test data of features.
         ss_feature_train = self.ss_feature.fit_transform(feature_data)
-
 
         if not options.get('is_tune', False):
             # 2. Train the model with KMeans
@@ -82,7 +87,6 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
             fitted_parameter = {
                 'best_params_': self.estimator.best_params_
             }
-
 
         metrics[FITTED_PARAMS] = fitted_parameter
 
@@ -137,6 +141,8 @@ def test_iris(is_tune):
     print(infer_out)
     print(infer_out.groupby(options.get('id_attr'))[CLUTER_NAME].apply(list).apply(np.unique))
     print(np.unique(infer_out[CLUTER_NAME], return_counts=True))
+
+
 def host_health_test(is_tune):
     import json
 

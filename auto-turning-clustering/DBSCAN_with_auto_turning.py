@@ -39,11 +39,11 @@ class DBSCAN_with_auto_turning(AbstractCluster):
             self.estimator = _DBSCAN(**out_params)
         else:
             param_grid = {
-                'eps': [0.1, 0.2, 0.3],
                 'min_samples': [3, 4, 5],
-                # 'metric': ['euclidean', 'manhattan'],
                 'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
-                # 'leaf_size': [20, 30, 40]
+                'eps': [0.1, 0.2, 0.3],
+                'metric': ['euclidean', 'manhattan'],
+                'leaf_size': [20, 30, 40]
             }
 
             def silhouette_score(estimator, X):

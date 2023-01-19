@@ -39,9 +39,10 @@ class BIRCH_with_auto_turning(AbstractCluster):
 
             self.estimator = _Birch(**out_params)
         else:
-            param_grid = {'threshold': [0.1, 0.2, 0.3],
+            param_grid = {'n_clusters': range(2, 11),
                           'branching_factor': [50, 100, 150],
-                          'n_clusters': range(2, 11)}
+                          'threshold': [0.1, 0.2, 0.3]
+                          }
 
             def silhouette_score(estimator, X):
                 estimator.fit(X)
@@ -97,7 +98,6 @@ class BIRCH_with_auto_turning(AbstractCluster):
                 'cluster_centers': centers,
                 'best_params_': self.estimator.best_params_
             }
-
 
         metrics[FITTED_PARAMS] = fitted_parameter
 
