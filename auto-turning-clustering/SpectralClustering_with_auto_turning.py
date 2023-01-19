@@ -80,8 +80,6 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
             # 3. Evaluate the model performance
             metrics = self.evaluate(ss_feature_train, y_labels)
             fitted_parameter = {
-                'num_cluster': np.unique(y_labels).shape[0],
-                'best_score_': self.estimator.best_score_,
                 'best_params_': self.estimator.best_params_
             }
 
@@ -180,5 +178,5 @@ if __name__ == '__main__':
     '''
     # host_health_test(False)
     # host_health_test(True)
-    test_iris(False)
-    # test_iris(True)
+    # test_iris(False)
+    test_iris(True)

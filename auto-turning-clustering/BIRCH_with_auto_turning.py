@@ -92,12 +92,9 @@ class BIRCH_with_auto_turning(AbstractCluster):
             metrics = self.evaluate(ss_feature_train, y_labels)
             sub_cluster_centers = list(self.estimator.best_estimator_.subcluster_centers_)
             centers = {i: list(sub_cluster_centers[i]) for i in range(len(sub_cluster_centers))}
-            cluster_set = set(filter(lambda label: label >= 0, y_labels.tolist()))
             fitted_parameter = {
-                'num_cluster': len(cluster_set),
                 'num_sub_cluster': len(sub_cluster_centers),
                 'cluster_centers': centers,
-                'best_score_': self.estimator.best_score_,
                 'best_params_': self.estimator.best_params_
             }
 

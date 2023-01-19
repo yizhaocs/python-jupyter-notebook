@@ -84,10 +84,7 @@ class DBSCAN_with_auto_turning(AbstractCluster):
             # 3. Evaluate the model performance
             y_labels = self.estimator.best_estimator_.labels_
             metrics = self.evaluate(ss_feature_train, y_labels)
-            cluster_set = set(filter(lambda label: label >= 0, y_labels.tolist()))
             fitted_parameter = {
-                'num_cluster': len(cluster_set),
-                'best_score_': self.estimator.best_score_,
                 'best_params_': self.estimator.best_params_
             }
 

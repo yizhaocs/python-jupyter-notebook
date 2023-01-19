@@ -88,10 +88,8 @@ class KMeansWithAutoTurning(AbstractCluster):
             cluster_centers = list(self.estimator.best_estimator_.cluster_centers_)
             centers = {i: list(cluster_centers[i]) for i in range(len(cluster_centers))}
             fitted_parameter = {
-                'num_cluster': len(cluster_centers),
                 'cluster_centers': centers,
                 '_intertia': self.estimator.best_estimator_.inertia_,
-                'best_score_': self.estimator.best_score_,
                 'best_params_': self.estimator.best_params_
             }
 
