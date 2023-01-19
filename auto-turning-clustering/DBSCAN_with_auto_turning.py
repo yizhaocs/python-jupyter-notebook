@@ -50,7 +50,7 @@ class DBSCAN_with_auto_turning(AbstractCluster):
                 estimator.fit(X)
                 cluster_labels = estimator.labels_
                 num_labels = len(set(cluster_labels))
-                num_samples = len(X)
+                num_samples = X.shape[0]
                 if num_labels == 1 or num_labels == num_samples:
                     return -1
                 else:
@@ -58,7 +58,7 @@ class DBSCAN_with_auto_turning(AbstractCluster):
                 return score
 
             # cv = [(slice(None), slice(None))]
-            self.estimator = GridSearchCV(_DBSCAN(), param_grid, cv=5, scoring=silhouette_score)
+            self.estimator = GridSearchCV(_DBSCAN(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
@@ -79,20 +79,14 @@ class DBSCAN_with_auto_turning(AbstractCluster):
             }
         else:
             # 2. Train the model with DBSCAN
-            # self.estimator.fit(ss_feature_train)
             self.estimator.fit(ss_feature_train)
 
-            try:
-                y_labels = self.estimator.best_estimator_.labels_
-            except:
-                y_labels = self.estimator.predict(ss_feature_train)
-            # y_labels = self.estimator.predict(ss_feature_train)
             # 3. Evaluate the model performance
+            y_labels = self.estimator.best_estimator_.labels_
             metrics = self.evaluate(ss_feature_train, y_labels)
             cluster_set = set(filter(lambda label: label >= 0, y_labels.tolist()))
             fitted_parameter = {
                 'num_cluster': len(cluster_set),
-                # '_intertia': self.estimator.best_estimator_.inertia_,
                 'best_score_': self.estimator.best_score_,
                 'best_params_': self.estimator.best_params_
             }

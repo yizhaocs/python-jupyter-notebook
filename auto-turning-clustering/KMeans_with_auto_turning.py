@@ -53,10 +53,16 @@ class KMeansWithAutoTurning(AbstractCluster):
             # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
 
             def silhouette_score(estimator, X):
-                labels = estimator.fit_predict(X)
-                score = sklearn.metrics.silhouette_score(X, labels, metric='euclidean')
+                estimator.fit(X)
+                cluster_labels = estimator.labels_
+                num_labels = len(set(cluster_labels))
+                num_samples = len(X)
+                if num_labels == 1 or num_labels == num_samples:
+                    return -1
+                else:
+                    score = sklearn.metrics.silhouette_score(X, cluster_labels)
                 return score
-            self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5, scoring=silhouette_score)
+            self.estimator = GridSearchCV(_KMeans(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
@@ -184,7 +190,7 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    host_health_test(False)
-    host_health_test(True)
+    # host_health_test(False)
+    # host_health_test(True)
     # test_iris(False)
-    # test_iris(True)
+    test_iris(True)
