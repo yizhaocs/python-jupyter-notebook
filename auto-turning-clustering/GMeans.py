@@ -137,7 +137,7 @@ if __name__ == '__main__':
     '''
     import json
 
-    raw_data = pd.read_csv(BASE_DIR + '/resources/data/host_health.csv')
+    raw_data = pd.read_csv('/Users/yzhao/PycharmProjects/python-jupyter-notebook/Resources/host_health.csv')
     raw_data = raw_data.drop('Event Receive Hour', axis=1)
 
     options = {
