@@ -140,8 +140,8 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
     }
-    kmeans = DBSCAN_with_auto_turning(options)
-    model, output, metrics = kmeans.train(raw_data, options)
+    algo = DBSCAN_with_auto_turning(options)
+    model, output, metrics = algo.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
     # output.to_csv(BASE_DIR + '/resources/output/kMeans/host_health_predict.csv', index=False)
@@ -154,7 +154,7 @@ def test_iris(is_tune):
         'id_attr': 'species',
         'model': model
     }
-    infer_out = kmeans.infer(raw_data, options)
+    infer_out = algo.infer(raw_data, options)
     print(infer_out)
     print(infer_out.groupby(options.get('id_attr'))[CLUTER_NAME].apply(list).apply(np.unique))
     print(np.unique(infer_out[CLUTER_NAME], return_counts=True))
@@ -174,8 +174,8 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune
     }
-    kmeans = DBSCAN_with_auto_turning(options)
-    model, output, metrics = kmeans.train(raw_data, options)
+    algo = DBSCAN_with_auto_turning(options)
+    model, output, metrics = algo.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
     # output.to_csv(BASE_DIR + '/resources/output/kMeans/host_health_predict.csv', index=False)
@@ -189,7 +189,7 @@ def host_health_test(is_tune):
         'id_attr': "Host Name",
         'model': model
     }
-    infer_out = kmeans.infer(raw_data, options)
+    infer_out = algo.infer(raw_data, options)
     print(infer_out)
     print(infer_out.groupby(options.get('id_attr'))[CLUTER_NAME].apply(list).apply(np.unique))
     print(np.unique(infer_out[CLUTER_NAME], return_counts=True))

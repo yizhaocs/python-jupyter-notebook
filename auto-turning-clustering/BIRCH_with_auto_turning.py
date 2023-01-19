@@ -1,99 +1,106 @@
-import codecs
-import logging
 import pickle
 import os
 import sys
 
 import sklearn
-from sklearn.datasets import load_iris, make_blobs
-from sklearn.metrics import adjusted_rand_score, silhouette_score
-from sklearn.metrics._scorer import adjusted_rand_scorer, make_scorer
+from sklearn.datasets import load_iris
+from sklearn.model_selection import GridSearchCV
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans as _KMeans
 from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import Birch as _Birch
 
 from AbstractAlgo import AbstractCluster
 from utils.param_utils import parse_params
 from utils.const_utils import *
 
-from utils.log_utils import get_logger
-from sklearn.model_selection import GridSearchCV
 
-logger = get_logger(__file__)
+class BIRCH_with_auto_turning(AbstractCluster):
+    """The BIRCH (Balanced Iterative Reducing and Clustering using Hierarchies) algorithm was designed specifically for
+    very large datasets, and it can be faster than batch K-Means, with similar results, as long as the number of
+    features is not too large (<20). During training, it builds a tree structure containing just enough information to
+    quickly assign each new instance to a cluster, without having to store all the instances in the tree: this approach
+    allows it to use limited memory, while handling huge datasets.
+    """
 
-
-class KMeansWithAutoTurning(AbstractCluster):
     def __init__(self, options):
-        # logger.info("Initializing KMeans Algo")
         self.ss_feature = StandardScaler()
-
         is_tune = options.get('is_tune', False)
         if not is_tune:
-            input_params = parse_params(
+            out_params = parse_params(
                 options.get('algo_params', {}),
-                ints=['n_clusters', 'n_init', 'max_iter', 'random_state'],
-                strs=['init', 'algorithm'],
-                floats=['tol']
+                ints=['n_clusters', 'branching_factor'],
+                floats=['threshold']
             )
-            self.estimator = _KMeans(**input_params)
-        else:
-            param_grid = {
-                          'n_clusters': range(2, 11),
-                          'n_init': [10, 20, 30, 40, 50],
-                          'max_iter': [100, 200, 300, 400, 500],
-                          'init': ['k-means++', 'random'],
-                          'tol': [1e-4, 1e-3, 1e-2]}
 
-            # self.estimator = GridSearchCV(_KMeans(), param_grid)
-            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
+            self.estimator = _Birch(**out_params)
+        else:
+            param_grid = {'threshold': [0.1, 0.2, 0.3],
+                          'branching_factor': [50, 100, 150],
+                          'n_clusters': range(2, 11)}
 
             def silhouette_score(estimator, X):
                 estimator.fit(X)
                 cluster_labels = estimator.labels_
                 num_labels = len(set(cluster_labels))
-                num_samples = len(X)
+                num_samples = X.shape[0]
                 if num_labels == 1 or num_labels == num_samples:
                     return -1
                 else:
                     score = sklearn.metrics.silhouette_score(X, cluster_labels)
                 return score
-            self.estimator = GridSearchCV(_KMeans(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
+
+                # cv = [(slice(None), slice(None))]
+
+            self.estimator = GridSearchCV(_Birch(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
 
-        # 1. Standardlize the train and test data of features.
-        ss_feature_train = self.ss_feature.fit_transform(feature_data)
-        # 2. Train the model with KMeans
-        self.estimator.fit(ss_feature_train)
-        # 3. Evaluate the model performance
-        y_labels = self.estimator.predict(ss_feature_train)
-        metrics = self.evaluate(ss_feature_train, y_labels)
-
         if not options.get('is_tune', False):
-            cluster_centers = list(self.estimator.cluster_centers_)
-            centers = {i: list(cluster_centers[i]) for i in range(len(cluster_centers))}
+            # 1. Standardlize the train and test data of features.
+            ss_feature_train = self.ss_feature.fit_transform(feature_data)
+
+            # 2. Train the model with KMeans
+            self.estimator.fit(ss_feature_train)
+
+            # 3. Evaluate the model performance
+            y_labels = self.estimator.predict(ss_feature_train)
+
+            metrics = self.evaluate(ss_feature_train, y_labels)
+            sub_cluster_centers = list(self.estimator.subcluster_centers_)
+            centers = {i: list(sub_cluster_centers[i]) for i in range(len(sub_cluster_centers))}
             fitted_parameter = {
-                'num_cluster': len(cluster_centers),
-                'cluster_centers': centers,
-                '_intertia': self.estimator.inertia_
+                'num_sub_cluster': len(sub_cluster_centers),
+                'cluster_centers': centers
             }
         else:
-            cluster_centers = list(self.estimator.best_estimator_.cluster_centers_)
-            centers = {i: list(cluster_centers[i]) for i in range(len(cluster_centers))}
+            # 1. Standardlize the train and test data of features.
+            ss_feature_train = self.ss_feature.fit_transform(feature_data)
+
+            # 2. Train the model with KMeans
+            self.estimator.fit(ss_feature_train)
+
+            # 3. Evaluate the model performance
+            y_labels = self.estimator.predict(ss_feature_train)
+
+            metrics = self.evaluate(ss_feature_train, y_labels)
+            sub_cluster_centers = list(self.estimator.best_estimator_.subcluster_centers_)
+            centers = {i: list(sub_cluster_centers[i]) for i in range(len(sub_cluster_centers))}
+            cluster_set = set(filter(lambda label: label >= 0, y_labels.tolist()))
             fitted_parameter = {
-                'num_cluster': len(cluster_centers),
+                'num_cluster': len(cluster_set),
+                'num_sub_cluster': len(sub_cluster_centers),
                 'cluster_centers': centers,
-                '_intertia': self.estimator.best_estimator_.inertia_,
                 'best_score_': self.estimator.best_score_,
                 'best_params_': self.estimator.best_params_
             }
+
 
         metrics[FITTED_PARAMS] = fitted_parameter
 
@@ -107,13 +114,14 @@ class KMeansWithAutoTurning(AbstractCluster):
 
     def infer(self, df, options):
         model_file = options['model']
-        kmeans_model = model_file[MODEL_TYPE_SINGLE]
+        birch_model = model_file[MODEL_TYPE_SINGLE]
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
         ss_feature_data = self.ss_feature.fit_transform(feature_data)
-        y_pred = kmeans_model.predict(ss_feature_data)
+        y_pred = birch_model.predict(ss_feature_data)
         output = pd.concat([df, pd.DataFrame(y_pred, columns=[CLUTER_NAME])], axis=1)
         return output
+
 
 def test_iris(is_tune):
     data = load_iris(as_frame=True)
@@ -126,11 +134,8 @@ def test_iris(is_tune):
         'id_attr': 'species',
         'train_factor': 0.9,
         'is_tune': is_tune,
-        'algo_params': {
-            'n_clusters': 5
-        }
     }
-    algo = KMeansWithAutoTurning(options)
+    algo = BIRCH_with_auto_turning(options)
     model, output, metrics = algo.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -148,6 +153,8 @@ def test_iris(is_tune):
     print(infer_out)
     print(infer_out.groupby(options.get('id_attr'))[CLUTER_NAME].apply(list).apply(np.unique))
     print(np.unique(infer_out[CLUTER_NAME], return_counts=True))
+
+
 def host_health_test(is_tune):
     import json
 
@@ -160,12 +167,9 @@ def host_health_test(is_tune):
         'id_attr': 'Host Name',
         'target_attr': '',
         'train_factor': 0.9,
-        'is_tune': is_tune,
-        'algo_params': {
-            'n_clusters': 5
-        }
+        'is_tune': is_tune
     }
-    algo = KMeansWithAutoTurning(options)
+    algo = BIRCH_with_auto_turning(options)
     model, output, metrics = algo.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
