@@ -125,7 +125,7 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'davies_bouldin_score'
+            'scoring': 'silhouette_score'
         }
     }
     algo = AutoClustering(options)

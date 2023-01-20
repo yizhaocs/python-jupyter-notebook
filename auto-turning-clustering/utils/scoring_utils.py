@@ -10,6 +10,7 @@ def silhouette_score(estimator, X):
         return -1
     else:
         score = sklearn.metrics.silhouette_score(X, cluster_labels)
+        print(f'silhouette_score:{score}')
     return score
 
 
@@ -22,6 +23,7 @@ def calinski_harabasz_score(estimator, X):
         return -1
     else:
         score = sklearn.metrics.calinski_harabasz_score(X, cluster_labels)
+        print(f'calinski_harabasz_score:{score}')
     return score
 
 
@@ -34,4 +36,5 @@ def davies_bouldin_score(estimator, X):
         return -1
     else:
         score = sklearn.metrics.davies_bouldin_score(X, cluster_labels)
+        print(f'davies_bouldin_score:{score}')
     return score
