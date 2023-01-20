@@ -1,6 +1,7 @@
 import pickle
 import os
 import sys
+import warnings
 
 import sklearn
 from sklearn.datasets import load_iris
@@ -17,7 +18,6 @@ from sklearn.cluster import SpectralClustering as _SpectralClustering
 from AbstractAlgo import AbstractCluster
 from utils.param_utils import parse_params
 from utils.const_utils import *
-
 
 class SpectralClustering_with_auto_turning(AbstractCluster):
     ''' This algorithm takes a similarity matrix between the instances and creates a low-dimensional embedding from it

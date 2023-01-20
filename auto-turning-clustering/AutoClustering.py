@@ -1,105 +1,82 @@
-import codecs
-import logging
-import pickle
 import os
 import sys
 
 import sklearn
-from sklearn.datasets import load_iris, make_blobs
+from sklearn.datasets import load_iris
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans as _KMeans
 from sklearn.preprocessing import StandardScaler
 
 from AbstractAlgo import AbstractCluster
-from utils.param_utils import parse_params
 from utils.const_utils import *
-
 from utils.log_utils import get_logger
-from sklearn.model_selection import GridSearchCV
+from BIRCH_with_auto_turning import BIRCH_with_auto_turning
+from DBSCAN_with_auto_turning import DBSCAN_with_auto_turning
+from KMeans_with_auto_turning import KMeans_with_auto_turning
+from SpectralClustering_with_auto_turning import SpectralClustering_with_auto_turning
+import warnings
+
+# filter out the warnings
+warnings.simplefilter("ignore")
 logger = get_logger(__file__)
 
 
-class KMeans_with_auto_turning(AbstractCluster):
+class AutoClustering(AbstractCluster):
+
     def __init__(self, options):
-        # logger.info("Initializing KMeans Algo")
         self.ss_feature = StandardScaler()
-
-        is_tune = options.get('is_tune', False)
-        if not is_tune:
-            input_params = parse_params(
-                options.get('algo_params', {}),
-                ints=['n_clusters', 'n_init', 'max_iter', 'random_state'],
-                strs=['init', 'algorithm'],
-                floats=['tol']
-            )
-            self.estimator = _KMeans(**input_params)
-        else:
-            param_grid = {
-                          'n_clusters': range(2, 11),
-                          'n_init': [10, 20, 30, 40, 50],
-                          'max_iter': [100, 200, 300, 400, 500],
-                          'init': ['k-means++', 'random'],
-                          'tol': [1e-4, 1e-3, 1e-2]}
-
-            # self.estimator = GridSearchCV(_KMeans(), param_grid)
-            # self.estimator = GridSearchCV(_KMeans(), param_grid, cv=5)
-
-            def silhouette_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = len(X)
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.silhouette_score(X, cluster_labels)
-                return score
-
-            self.estimator = GridSearchCV(_KMeans(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
+        options.update({'is_tune': True})
+        self.estimator_birch = BIRCH_with_auto_turning(options)
+        self.estimator_dbscan = DBSCAN_with_auto_turning(options)
+        self.estimator_kmeans = KMeans_with_auto_turning(options)
+        self.estimator_spectral_clustering = SpectralClustering_with_auto_turning(options)
 
     def train(self, df, options):
-        feature_attrs = options['feature_attrs']
-        feature_data = df[feature_attrs]
+        silhouette_scores = []
+        model_birch, output_birch, metrics_birch = self.estimator_birch.train(df, options)
 
-        # 1. Standardlize the train and test data of features.
-        ss_feature_train = self.ss_feature.fit_transform(feature_data)
-        # 2. Train the model with KMeans
-        self.estimator.fit(ss_feature_train)
-        # 3. Evaluate the model performance
-        y_labels = self.estimator.predict(ss_feature_train)
-        metrics = self.evaluate(ss_feature_train, y_labels)
+        if FITTED_ERRORS in metrics_birch:
+            silhouette_score_birch = metrics_birch[FITTED_ERRORS]['Silhouette Score']
+            if silhouette_score_birch:
+                silhouette_scores.append(silhouette_score_birch)
+                print(f'silhouette_score_birch:{silhouette_score_birch}')
 
-        if not options.get('is_tune', False):
-            cluster_centers = list(self.estimator.cluster_centers_)
-            centers = {i: list(cluster_centers[i]) for i in range(len(cluster_centers))}
-            fitted_parameter = {
-                'num_cluster': len(cluster_centers),
-                'cluster_centers': centers,
-                '_intertia': self.estimator.inertia_
-            }
-        else:
-            cluster_centers = list(self.estimator.best_estimator_.cluster_centers_)
-            centers = {i: list(cluster_centers[i]) for i in range(len(cluster_centers))}
-            fitted_parameter = {
-                'cluster_centers': centers,
-                '_intertia': self.estimator.best_estimator_.inertia_,
-                'best_params_': self.estimator.best_params_
-            }
+        model_dbscan, output_dbscan, metrics_dbscan = self.estimator_dbscan.train(df, options)
 
-        metrics[FITTED_PARAMS] = fitted_parameter
+        if FITTED_ERRORS in metrics_dbscan:
+            silhouette_score_dbscan = metrics_dbscan[FITTED_ERRORS]['Silhouette Score']
+            if silhouette_score_dbscan:
+                silhouette_scores.append(silhouette_score_dbscan)
+                print(f'silhouette_score_dbscan:{silhouette_score_dbscan}')
 
-        # 4. Handle the return value, store the model into cache
-        output = pd.concat([df, pd.DataFrame(y_labels, columns=[CLUTER_NAME])], axis=1)
+        model_kmeans, output_kmeans, metrics_kmeans = self.estimator_kmeans.train(df, options)
+        if FITTED_ERRORS in metrics_kmeans:
+            silhouette_score_kmeans = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
+            if silhouette_score_kmeans:
+                silhouette_scores.append(silhouette_score_kmeans)
+                print(f'silhouette_score_kmeans:{silhouette_score_kmeans}')
 
-        if not options.get('is_tune', False):
-            return {MODEL_TYPE_SINGLE: self.estimator}, output, metrics
-        else:
-            return {MODEL_TYPE_SINGLE: self.estimator.best_estimator_}, output, metrics
+        model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering = self.estimator_spectral_clustering.train(df, options)
+
+        if FITTED_ERRORS in metrics_spectral_clustering:
+            silhouette_score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Silhouette Score']
+            if silhouette_score_spectral_clustering:
+                silhouette_scores.append(silhouette_score_spectral_clustering)
+                print(f'silhouette_score_spectral_clustering:{silhouette_score_spectral_clustering}')
+        max_silhouette_score = max(silhouette_scores)
+
+        if max_silhouette_score == silhouette_score_birch:
+            return model_birch, output_birch, metrics_birch
+        elif max_silhouette_score == silhouette_score_dbscan:
+            return model_dbscan, output_dbscan, metrics_dbscan
+        elif max_silhouette_score == silhouette_score_kmeans:
+            return model_kmeans, output_kmeans, metrics_kmeans
+        elif max_silhouette_score == silhouette_score_spectral_clustering:
+            return model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering
 
     def infer(self, df, options):
         model_file = options['model']
@@ -110,6 +87,8 @@ class KMeans_with_auto_turning(AbstractCluster):
         y_pred = kmeans_model.predict(ss_feature_data)
         output = pd.concat([df, pd.DataFrame(y_pred, columns=[CLUTER_NAME])], axis=1)
         return output
+
+
 
 def test_iris(is_tune):
     data = load_iris(as_frame=True)
@@ -126,7 +105,7 @@ def test_iris(is_tune):
             'n_clusters': 5
         }
     }
-    algo = KMeans_with_auto_turning(options)
+    algo = AutoClustering(options)
     model, output, metrics = algo.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -144,6 +123,8 @@ def test_iris(is_tune):
     print(infer_out)
     print(infer_out.groupby(options.get('id_attr'))[CLUTER_NAME].apply(list).apply(np.unique))
     print(np.unique(infer_out[CLUTER_NAME], return_counts=True))
+
+
 def host_health_test(is_tune):
     import json
 
@@ -161,7 +142,7 @@ def host_health_test(is_tune):
             'n_clusters': 5
         }
     }
-    algo = KMeans_with_auto_turning(options)
+    algo = AutoClustering(options)
     model, output, metrics = algo.train(raw_data, options)
     print(output)
     print(json.dumps(metrics, indent=2))
@@ -186,7 +167,5 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    # host_health_test(False)
     # host_health_test(True)
-    # test_iris(False)
     test_iris(True)
