@@ -39,7 +39,7 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
             )
             self.estimator = _SpectralClustering(**out_params)
         else:
-            param_grid = {'n_clusters': range(2, 5),
+            param_grid = {'n_clusters': list(range(2, 11)),
                           'assign_labels': ['kmeans', 'discretize'],
                           'n_neighbors': [5, 10, 15],
                           'gamma': [0.01, 0.1, 1],

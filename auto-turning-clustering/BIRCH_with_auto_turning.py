@@ -39,7 +39,7 @@ class BIRCH_with_auto_turning(AbstractCluster):
 
             self.estimator = _Birch(**out_params)
         else:
-            param_grid = {'n_clusters': range(2, 5),
+            param_grid = {'n_clusters': list(range(2, 11)),
                           'branching_factor': [50, 100, 150],
                           'threshold': [0.1, 0.2, 0.3]
                           }

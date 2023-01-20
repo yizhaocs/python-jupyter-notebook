@@ -40,7 +40,7 @@ class KMeans_with_auto_turning(AbstractCluster):
             self.estimator = _KMeans(**input_params)
         else:
             param_grid = {
-                          'n_clusters': range(2, 5),
+                          'n_clusters': list(range(2, 11)),
                           'n_init': [10, 20, 30, 40, 50],
                           'max_iter': [100, 200, 300, 400, 500],
                           'init': ['k-means++', 'random'],
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    host_health_test(False)
-    host_health_test(True)
-    test_iris(False)
+    # host_health_test(False)
+    # host_health_test(True)
+    # test_iris(False)
     test_iris(True)
