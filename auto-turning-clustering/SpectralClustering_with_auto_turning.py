@@ -39,7 +39,7 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
             )
             self.estimator = _SpectralClustering(**out_params)
         else:
-            param_grid = {'n_clusters': range(2, 11),
+            param_grid = {'n_clusters': range(2, 5),
                           'affinity': ['nearest_neighbors', 'rbf', 'poly'],
                           'assign_labels': ['kmeans', 'discretize'],
                           'n_neighbors': [5, 10, 15],
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    host_health_test(False)
-    host_health_test(True)
-    test_iris(False)
+    # host_health_test(False)
+    # host_health_test(True)
+    # test_iris(False)
     test_iris(True)

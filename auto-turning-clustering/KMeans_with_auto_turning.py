@@ -40,7 +40,7 @@ class KMeans_with_auto_turning(AbstractCluster):
             self.estimator = _KMeans(**input_params)
         else:
             param_grid = {
-                          'n_clusters': range(2, 11),
+                          'n_clusters': range(2, 5),
                           'n_init': [10, 20, 30, 40, 50],
                           'max_iter': [100, 200, 300, 400, 500],
                           'init': ['k-means++', 'random'],

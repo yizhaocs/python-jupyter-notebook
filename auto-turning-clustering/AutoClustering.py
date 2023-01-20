@@ -190,5 +190,9 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
+
+    from datetime import datetime
+    t0 = datetime.now()
     # host_health_test(True)
     test_iris(True)
+    print("Time to compute:", (datetime.now() - t0)) # Time to compute: 0:00:00.008133
