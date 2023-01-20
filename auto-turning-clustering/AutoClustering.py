@@ -30,6 +30,7 @@ class AutoClustering(AbstractCluster):
     def __init__(self, options):
         self.ss_feature = StandardScaler()
         options.update({'is_tune': True})
+        self.estimator = None
         self.estimator_birch = BIRCH_with_auto_turning(options)
         self.estimator_dbscan = DBSCAN_with_auto_turning(options)
         self.estimator_kmeans = KMeans_with_auto_turning(options)
@@ -48,7 +49,6 @@ class AutoClustering(AbstractCluster):
                 score_birch = metrics_birch[FITTED_ERRORS]['Davies Bouldin Score']
             if score_birch:
                 scores.append(score_birch)
-                print(f'score_birch:{score_birch}')
 
         model_dbscan, output_dbscan, metrics_dbscan = self.estimator_dbscan.train(df, options)
 
@@ -61,7 +61,6 @@ class AutoClustering(AbstractCluster):
                 score_dbscan = metrics_dbscan[FITTED_ERRORS]['Davies Bouldin Score']
             if score_dbscan:
                 scores.append(score_dbscan)
-                print(f'score_dbscan:{score_dbscan}')
 
         model_kmeans, output_kmeans, metrics_kmeans = self.estimator_kmeans.train(df, options)
         if FITTED_ERRORS in metrics_kmeans:
@@ -73,7 +72,6 @@ class AutoClustering(AbstractCluster):
                 score_kmeans = metrics_kmeans[FITTED_ERRORS]['Davies Bouldin Score']
             if score_kmeans:
                 scores.append(score_kmeans)
-                print(f'score_kmeans:{score_kmeans}')
 
         model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering = self.estimator_spectral_clustering.train(df, options)
 
@@ -86,26 +84,32 @@ class AutoClustering(AbstractCluster):
                 score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Davies Bouldin Score']
             if score_spectral_clustering:
                 scores.append(score_spectral_clustering)
-                print(f'score_spectral_clustering:{score_spectral_clustering}')
         max_score = max(scores)
+        print(f'scores:{scores}')
+        print(f'max_score:{max_score}')
 
         if max_score == score_birch:
+            self.estimator = self.estimator_birch
             return model_birch, output_birch, metrics_birch
         elif max_score == score_dbscan:
+            self.estimator = self.estimator_dbscan
             return model_dbscan, output_dbscan, metrics_dbscan
         elif max_score == score_kmeans:
+            self.estimator = self.estimator_kmeans
             return model_kmeans, output_kmeans, metrics_kmeans
         elif max_score == score_spectral_clustering:
+            self.estimator = self.estimator_spectral_clustering
             return model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering
 
     def infer(self, df, options):
-        model_file = options['model']
-        kmeans_model = model_file[MODEL_TYPE_SINGLE]
-        feature_attrs = options['feature_attrs']
-        feature_data = df[feature_attrs]
-        ss_feature_data = self.ss_feature.fit_transform(feature_data)
-        y_pred = kmeans_model.predict(ss_feature_data)
-        output = pd.concat([df, pd.DataFrame(y_pred, columns=[CLUTER_NAME])], axis=1)
+        output = self.estimator.infer(df, options) # model_file = options['model']
+        # kmeans_model = model_file[MODEL_TYPE_SINGLE]
+        # feature_attrs = options['feature_attrs']
+        # feature_data = df[feature_attrs]
+        # ss_feature_data = self.ss_feature.fit_transform(feature_data)
+        # y_pred = kmeans_model.predict(ss_feature_data)
+        # output = pd.concat([df, pd.DataFrame(y_pred, columns=[CLUTER_NAME])], axis=1)
+
         return output
 
 
