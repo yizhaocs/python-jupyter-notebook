@@ -11,6 +11,7 @@ sys.path.append(BASE_DIR)
 
 import numpy as np
 import pandas as pd
+from utils.scoring_utils import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN as _DBSCAN, AgglomerativeClustering
 from scipy.spatial.distance import euclidean
@@ -44,29 +45,15 @@ class DBSCAN_with_auto_turning(AbstractCluster):
                 'eps': [0.1, 0.2, 0.3],
             }
 
-            def silhouette_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = X.shape[0]
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.silhouette_score(X, cluster_labels)
-                return score
-            def calinski_harabasz_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = X.shape[0]
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.calinski_harabasz_score(X, cluster_labels)
-                return score
 
             # cv = [(slice(None), slice(None))]
-            self.estimator = GridSearchCV(_DBSCAN(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
+            scoring = options['algo_params']['scoring']
+            if scoring == 'silhouette_score':
+                self.estimator = GridSearchCV(_DBSCAN(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
+            elif scoring == 'calinski_harabasz_score':
+                self.estimator = GridSearchCV(_DBSCAN(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
+            elif scoring == 'davies_bouldin_score':
+                self.estimator = GridSearchCV(_DBSCAN(), param_grid, n_jobs=-1, cv=5, scoring=davies_bouldin_score)
 
     def train(self, df, options):
         feature_attrs = options['feature_attrs']

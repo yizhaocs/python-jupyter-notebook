@@ -36,46 +36,58 @@ class AutoClustering(AbstractCluster):
         self.estimator_spectral_clustering = SpectralClustering_with_auto_turning(options)
 
     def train(self, df, options):
-        silhouette_scores = []
+        scores = []
         model_birch, output_birch, metrics_birch = self.estimator_birch.train(df, options)
-
+        scoring = options['algo_params']['scoring']
         if FITTED_ERRORS in metrics_birch:
-            silhouette_score_birch = metrics_birch[FITTED_ERRORS]['Silhouette Score']
-            if silhouette_score_birch:
-                silhouette_scores.append(silhouette_score_birch)
-                print(f'silhouette_score_birch:{silhouette_score_birch}')
+            if scoring == 'silhouette_score':
+                score_birch = metrics_birch[FITTED_ERRORS]['Silhouette Score']
+            elif scoring == 'calinski_harabasz_score':
+                score_birch = metrics_birch[FITTED_ERRORS]['Calinski Marabasz Score']
+            if score_birch:
+                scores.append(score_birch)
+                print(f'score_birch:{score_birch}')
 
         model_dbscan, output_dbscan, metrics_dbscan = self.estimator_dbscan.train(df, options)
 
         if FITTED_ERRORS in metrics_dbscan:
-            silhouette_score_dbscan = metrics_dbscan[FITTED_ERRORS]['Silhouette Score']
-            if silhouette_score_dbscan:
-                silhouette_scores.append(silhouette_score_dbscan)
-                print(f'silhouette_score_dbscan:{silhouette_score_dbscan}')
+            if scoring == 'silhouette_score':
+                score_dbscan = metrics_dbscan[FITTED_ERRORS]['Silhouette Score']
+            elif scoring == 'calinski_harabasz_score':
+                score_dbscan = metrics_dbscan[FITTED_ERRORS]['Calinski Marabasz Score']
+            if score_dbscan:
+                scores.append(score_dbscan)
+                print(f'score_dbscan:{score_dbscan}')
 
         model_kmeans, output_kmeans, metrics_kmeans = self.estimator_kmeans.train(df, options)
         if FITTED_ERRORS in metrics_kmeans:
-            silhouette_score_kmeans = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
-            if silhouette_score_kmeans:
-                silhouette_scores.append(silhouette_score_kmeans)
-                print(f'silhouette_score_kmeans:{silhouette_score_kmeans}')
+            if scoring == 'silhouette_score':
+                score_kmeans = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
+            elif scoring == 'calinski_harabasz_score':
+                score_kmeans = metrics_kmeans[FITTED_ERRORS]['Calinski Marabasz Score']
+            if score_kmeans:
+                scores.append(score_kmeans)
+                print(f'score_kmeans:{score_kmeans}')
 
         model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering = self.estimator_spectral_clustering.train(df, options)
 
         if FITTED_ERRORS in metrics_spectral_clustering:
-            silhouette_score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Silhouette Score']
-            if silhouette_score_spectral_clustering:
-                silhouette_scores.append(silhouette_score_spectral_clustering)
-                print(f'silhouette_score_spectral_clustering:{silhouette_score_spectral_clustering}')
-        max_silhouette_score = max(silhouette_scores)
+            if scoring == 'silhouette_score':
+                score_spectral_clustering = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
+            elif scoring == 'calinski_harabasz_score':
+                score_spectral_clustering = metrics_kmeans[FITTED_ERRORS]['Calinski Marabasz Score']
+            if score_spectral_clustering:
+                scores.append(score_kmeans)
+                print(f'score_kmeans:{score_kmeans}')
+        max_score = max(scores)
 
-        if max_silhouette_score == silhouette_score_birch:
+        if max_score == score_birch:
             return model_birch, output_birch, metrics_birch
-        elif max_silhouette_score == silhouette_score_dbscan:
+        elif max_score == score_dbscan:
             return model_dbscan, output_dbscan, metrics_dbscan
-        elif max_silhouette_score == silhouette_score_kmeans:
+        elif max_score == score_kmeans:
             return model_kmeans, output_kmeans, metrics_kmeans
-        elif max_silhouette_score == silhouette_score_spectral_clustering:
+        elif max_score == score_spectral_clustering:
             return model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering
 
     def infer(self, df, options):
@@ -87,7 +99,6 @@ class AutoClustering(AbstractCluster):
         y_pred = kmeans_model.predict(ss_feature_data)
         output = pd.concat([df, pd.DataFrame(y_pred, columns=[CLUTER_NAME])], axis=1)
         return output
-
 
 
 def test_iris(is_tune):
@@ -102,7 +113,7 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'n_clusters': 5
+            'scoring': 'calinski_harabasz_score'
         }
     }
     algo = AutoClustering(options)
@@ -139,7 +150,7 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'n_clusters': 5
+            'scoring': 'silhouette_score'
         }
     }
     algo = AutoClustering(options)

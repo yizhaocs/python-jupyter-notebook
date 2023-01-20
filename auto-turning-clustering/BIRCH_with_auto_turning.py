@@ -17,7 +17,7 @@ from sklearn.cluster import Birch as _Birch
 from AbstractAlgo import AbstractCluster
 from utils.param_utils import parse_params
 from utils.const_utils import *
-
+from utils.scoring_utils import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
 class BIRCH_with_auto_turning(AbstractCluster):
     """The BIRCH (Balanced Iterative Reducing and Clustering using Hierarchies) algorithm was designed specifically for
@@ -44,32 +44,15 @@ class BIRCH_with_auto_turning(AbstractCluster):
                           'threshold': [0.1, 0.2, 0.3]
                           }
 
-
-            def silhouette_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = X.shape[0]
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.silhouette_score(X, cluster_labels)
-                return score
-
-            def calinski_harabasz_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = X.shape[0]
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.calinski_harabasz_score(X, cluster_labels)
-                return score
             # cv = [(slice(None), slice(None))]
 
-            self.estimator = GridSearchCV(_Birch(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
-
+            scoring = options['algo_params']['scoring']
+            if scoring == 'silhouette_score':
+                self.estimator = GridSearchCV(_Birch(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
+            elif scoring == 'calinski_harabasz_score':
+                self.estimator = GridSearchCV(_Birch(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
+            elif scoring == 'davies_bouldin_score':
+                self.estimator = GridSearchCV(_Birch(), param_grid, n_jobs=-1, cv=5, scoring=davies_bouldin_score)
     def train(self, df, options):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]

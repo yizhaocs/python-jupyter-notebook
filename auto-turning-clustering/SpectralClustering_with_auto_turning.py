@@ -18,7 +18,7 @@ from sklearn.cluster import SpectralClustering as _SpectralClustering
 from AbstractAlgo import AbstractCluster
 from utils.param_utils import parse_params
 from utils.const_utils import *
-
+from utils.scoring_utils import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 class SpectralClustering_with_auto_turning(AbstractCluster):
     ''' This algorithm takes a similarity matrix between the instances and creates a low-dimensional embedding from it
     (i.e., it reduces its dimensionality), then it uses another clustering algorithm in this low-dimensional space
@@ -49,28 +49,13 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
                           }
 
 
-            def silhouette_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = len(X)
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.silhouette_score(X, cluster_labels)
-                return score
-            def calinski_harabasz_score(estimator, X):
-                estimator.fit(X)
-                cluster_labels = estimator.labels_
-                num_labels = len(set(cluster_labels))
-                num_samples = X.shape[0]
-                if num_labels == 1 or num_labels == num_samples:
-                    return -1
-                else:
-                    score = sklearn.metrics.calinski_harabasz_score(X, cluster_labels)
-                return score
-            self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
-
+            scoring = options['algo_params']['scoring']
+            if scoring == 'silhouette_score':
+                self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
+            elif scoring == 'calinski_harabasz_score':
+                self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
+            elif scoring == 'davies_bouldin_score':
+                self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=davies_bouldin_score)
     def train(self, df, options):
 
         feature_attrs = options['feature_attrs']
