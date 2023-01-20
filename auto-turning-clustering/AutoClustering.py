@@ -44,6 +44,8 @@ class AutoClustering(AbstractCluster):
                 score_birch = metrics_birch[FITTED_ERRORS]['Silhouette Score']
             elif scoring == 'calinski_harabasz_score':
                 score_birch = metrics_birch[FITTED_ERRORS]['Calinski Marabasz Score']
+            elif scoring == 'davies_bouldin_score':
+                score_birch = metrics_birch[FITTED_ERRORS]['Davies Bouldin Score']
             if score_birch:
                 scores.append(score_birch)
                 print(f'score_birch:{score_birch}')
@@ -55,6 +57,8 @@ class AutoClustering(AbstractCluster):
                 score_dbscan = metrics_dbscan[FITTED_ERRORS]['Silhouette Score']
             elif scoring == 'calinski_harabasz_score':
                 score_dbscan = metrics_dbscan[FITTED_ERRORS]['Calinski Marabasz Score']
+            elif scoring == 'davies_bouldin_score':
+                score_dbscan = metrics_dbscan[FITTED_ERRORS]['Davies Bouldin Score']
             if score_dbscan:
                 scores.append(score_dbscan)
                 print(f'score_dbscan:{score_dbscan}')
@@ -65,6 +69,8 @@ class AutoClustering(AbstractCluster):
                 score_kmeans = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
             elif scoring == 'calinski_harabasz_score':
                 score_kmeans = metrics_kmeans[FITTED_ERRORS]['Calinski Marabasz Score']
+            elif scoring == 'davies_bouldin_score':
+                score_kmeans = metrics_kmeans[FITTED_ERRORS]['Davies Bouldin Score']
             if score_kmeans:
                 scores.append(score_kmeans)
                 print(f'score_kmeans:{score_kmeans}')
@@ -73,12 +79,14 @@ class AutoClustering(AbstractCluster):
 
         if FITTED_ERRORS in metrics_spectral_clustering:
             if scoring == 'silhouette_score':
-                score_spectral_clustering = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
+                score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Silhouette Score']
             elif scoring == 'calinski_harabasz_score':
-                score_spectral_clustering = metrics_kmeans[FITTED_ERRORS]['Calinski Marabasz Score']
+                score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Calinski Marabasz Score']
+            elif scoring == 'davies_bouldin_score':
+                score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Davies Bouldin Score']
             if score_spectral_clustering:
-                scores.append(score_kmeans)
-                print(f'score_kmeans:{score_kmeans}')
+                scores.append(score_spectral_clustering)
+                print(f'score_spectral_clustering:{score_spectral_clustering}')
         max_score = max(scores)
 
         if max_score == score_birch:
@@ -113,7 +121,7 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'calinski_harabasz_score'
+            'scoring': 'davies_bouldin_score'
         }
     }
     algo = AutoClustering(options)
