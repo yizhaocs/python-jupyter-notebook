@@ -180,5 +180,5 @@ if __name__ == '__main__':
     '''
     # host_health_test(False)
     # host_health_test(True)
-    # test_iris(False)
-    test_iris(True)
+    test_iris(False)
+    # test_iris(True)
