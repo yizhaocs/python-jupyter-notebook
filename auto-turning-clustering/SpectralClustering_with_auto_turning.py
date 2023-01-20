@@ -48,6 +48,7 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
                           'coef0': [0, 1]
                           }
 
+
             def silhouette_score(estimator, X):
                 estimator.fit(X)
                 cluster_labels = estimator.labels_
@@ -58,8 +59,17 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
                 else:
                     score = sklearn.metrics.silhouette_score(X, cluster_labels)
                 return score
-
-            self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
+            def calinski_harabasz_score(estimator, X):
+                estimator.fit(X)
+                cluster_labels = estimator.labels_
+                num_labels = len(set(cluster_labels))
+                num_samples = X.shape[0]
+                if num_labels == 1 or num_labels == num_samples:
+                    return -1
+                else:
+                    score = sklearn.metrics.calinski_harabasz_score(X, cluster_labels)
+                return score
+            self.estimator = GridSearchCV(_SpectralClustering(), param_grid, n_jobs=-1, cv=5, scoring=calinski_harabasz_score)
 
     def train(self, df, options):
 
