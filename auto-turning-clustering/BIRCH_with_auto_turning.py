@@ -125,6 +125,9 @@ def test_iris(is_tune):
         'id_attr': 'species',
         'train_factor': 0.9,
         'is_tune': is_tune,
+        'algo_params': {
+            'scoring': 'silhouette_score'
+        }
     }
     algo = BIRCH_with_auto_turning(options)
     model, output, metrics = algo.train(raw_data, options)
@@ -158,7 +161,10 @@ def host_health_test(is_tune):
         'id_attr': 'Host Name',
         'target_attr': '',
         'train_factor': 0.9,
-        'is_tune': is_tune
+        'is_tune': is_tune,
+        'algo_params': {
+            'scoring': 'silhouette_score'
+        }
     }
     algo = BIRCH_with_auto_turning(options)
     model, output, metrics = algo.train(raw_data, options)

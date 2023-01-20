@@ -115,7 +115,7 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'n_clusters': 5
+            'scoring': 'silhouette_score'
         }
     }
     algo = KMeans_with_auto_turning(options)
@@ -150,7 +150,7 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'n_clusters': 5
+            'scoring': 'silhouette_score'
         }
     }
     algo = KMeans_with_auto_turning(options)
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    # host_health_test(False)
-    # host_health_test(True)
-    # test_iris(False)
+    host_health_test(False)
+    host_health_test(True)
+    test_iris(False)
     test_iris(True)

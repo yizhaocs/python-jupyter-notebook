@@ -117,6 +117,9 @@ def test_iris(is_tune):
         'id_attr': 'species',
         'train_factor': 0.9,
         'is_tune': is_tune,
+        'algo_params': {
+            'scoring': 'silhouette_score'
+        }
     }
     algo = SpectralClustering_with_auto_turning(options)
     model, output, metrics = algo.train(raw_data, options)
@@ -151,6 +154,9 @@ def host_health_test(is_tune):
         'target_attr': '',
         'train_factor': 0.9,
         'is_tune': is_tune,
+        'algo_params': {
+            'scoring': 'silhouette_score'
+        }
     }
     algo = SpectralClustering_with_auto_turning(options)
     model, output, metrics = algo.train(raw_data, options)
@@ -177,7 +183,7 @@ if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
             python KMeans.py
     '''
-    # host_health_test(False)
-    # host_health_test(True)
-    # test_iris(False)
+    host_health_test(False)
+    host_health_test(True)
+    test_iris(False)
     test_iris(True)
