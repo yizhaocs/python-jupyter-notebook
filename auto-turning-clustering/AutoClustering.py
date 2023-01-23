@@ -34,78 +34,93 @@ class AutoClustering(AbstractCluster):
 
     def train(self, df, options):
         scores = []
-        model_birch, output_birch, metrics_birch = self.estimator_birch.train(df, options)
-        scoring = options['algo_params']['scoring']
-        if FITTED_ERRORS in metrics_birch:
-            if scoring == 'silhouette_score':
-                score_birch = metrics_birch[FITTED_ERRORS]['Silhouette Score']
-            elif scoring == 'calinski_harabasz_score':
-                score_birch = metrics_birch[FITTED_ERRORS]['Calinski Marabasz Score']
-            elif scoring == 'davies_bouldin_score':
-                score_birch = metrics_birch[FITTED_ERRORS]['Davies Bouldin Score']
-            if score_birch:
-                scores.append(score_birch)
+        score_birch = 0
+        score_dbscan = 0
+        score_kmeans = 0
+        score_spectral_clustering = 0
 
-        model_dbscan, output_dbscan, metrics_dbscan = self.estimator_dbscan.train(df, options)
+        try:
+            model_birch, output_birch, metrics_birch = self.estimator_birch.train(df, options)
+            scoring = options['algo_params']['scoring']
+            if FITTED_ERRORS in metrics_birch:
+                if scoring == 'silhouette_score':
+                    score_birch = metrics_birch[FITTED_ERRORS]['Silhouette Score']
+                elif scoring == 'calinski_harabasz_score':
+                    score_birch = metrics_birch[FITTED_ERRORS]['Calinski Marabasz Score']
+                elif scoring == 'davies_bouldin_score':
+                    score_birch = metrics_birch[FITTED_ERRORS]['Davies Bouldin Score']
+                if score_birch:
+                    scores.append(score_birch)
+        except Exception as e:
+            logger.error(f'Failed to train BIRCH in the auto mode:{e}')
 
-        if FITTED_ERRORS in metrics_dbscan:
-            if scoring == 'silhouette_score':
-                score_dbscan = metrics_dbscan[FITTED_ERRORS]['Silhouette Score']
-            elif scoring == 'calinski_harabasz_score':
-                score_dbscan = metrics_dbscan[FITTED_ERRORS]['Calinski Marabasz Score']
-            elif scoring == 'davies_bouldin_score':
-                score_dbscan = metrics_dbscan[FITTED_ERRORS]['Davies Bouldin Score']
-            if score_dbscan:
-                scores.append(score_dbscan)
+        try:
+            model_dbscan, output_dbscan, metrics_dbscan = self.estimator_dbscan.train(df, options)
 
-        model_kmeans, output_kmeans, metrics_kmeans = self.estimator_kmeans.train(df, options)
-        if FITTED_ERRORS in metrics_kmeans:
-            if scoring == 'silhouette_score':
-                score_kmeans = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
-            elif scoring == 'calinski_harabasz_score':
-                score_kmeans = metrics_kmeans[FITTED_ERRORS]['Calinski Marabasz Score']
-            elif scoring == 'davies_bouldin_score':
-                score_kmeans = metrics_kmeans[FITTED_ERRORS]['Davies Bouldin Score']
-            if score_kmeans:
-                scores.append(score_kmeans)
+            if FITTED_ERRORS in metrics_dbscan:
+                if scoring == 'silhouette_score':
+                    score_dbscan = metrics_dbscan[FITTED_ERRORS]['Silhouette Score']
+                elif scoring == 'calinski_harabasz_score':
+                    score_dbscan = metrics_dbscan[FITTED_ERRORS]['Calinski Marabasz Score']
+                elif scoring == 'davies_bouldin_score':
+                    score_dbscan = metrics_dbscan[FITTED_ERRORS]['Davies Bouldin Score']
+                if score_dbscan:
+                    scores.append(score_dbscan)
+        except Exception as e:
+            logger.error(f'Failed to train DBSCAN in the auto mode:{e}')
 
-        model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering = self.estimator_spectral_clustering.train(df, options)
+        try:
+            model_kmeans, output_kmeans, metrics_kmeans = self.estimator_kmeans.train(df, options)
+            if FITTED_ERRORS in metrics_kmeans:
+                if scoring == 'silhouette_score':
+                    score_kmeans = metrics_kmeans[FITTED_ERRORS]['Silhouette Score']
+                elif scoring == 'calinski_harabasz_score':
+                    score_kmeans = metrics_kmeans[FITTED_ERRORS]['Calinski Marabasz Score']
+                elif scoring == 'davies_bouldin_score':
+                    score_kmeans = metrics_kmeans[FITTED_ERRORS]['Davies Bouldin Score']
+                if score_kmeans:
+                    scores.append(score_kmeans)
+        except Exception as e:
+            logger.error(f'Failed to train KMeans in the auto mode:{e}')
 
-        if FITTED_ERRORS in metrics_spectral_clustering:
-            if scoring == 'silhouette_score':
-                score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Silhouette Score']
-            elif scoring == 'calinski_harabasz_score':
-                score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Calinski Marabasz Score']
-            elif scoring == 'davies_bouldin_score':
-                score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Davies Bouldin Score']
-            if score_spectral_clustering:
-                scores.append(score_spectral_clustering)
+        try:
+            model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering = self.estimator_spectral_clustering.train(df, options)
+
+            if FITTED_ERRORS in metrics_spectral_clustering:
+                if scoring == 'silhouette_score':
+                    score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Silhouette Score']
+                elif scoring == 'calinski_harabasz_score':
+                    score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Calinski Marabasz Score']
+                elif scoring == 'davies_bouldin_score':
+                    score_spectral_clustering = metrics_spectral_clustering[FITTED_ERRORS]['Davies Bouldin Score']
+                if score_spectral_clustering:
+                    scores.append(score_spectral_clustering)
+        except Exception as e:
+            logger.error(f'Failed to train Spectral Clustering in the auto mode:{e}')
+
         max_score = max(scores)
-        print(f'scores:{scores}')
-        print(f'max_score:{max_score}')
+        logger.info(f'AutoClustering scores:{scores}')
+        logger.info(f'AutoClustering max_score:{max_score}')
 
         if max_score == score_birch:
             self.estimator = self.estimator_birch
+            logger.info(f'BIRCH is the best')
             return model_birch, output_birch, metrics_birch
         elif max_score == score_dbscan:
             self.estimator = self.estimator_dbscan
+            logger.info(f'DBSCAN is the best')
             return model_dbscan, output_dbscan, metrics_dbscan
         elif max_score == score_kmeans:
             self.estimator = self.estimator_kmeans
+            logger.info(f'KMeans is the best')
             return model_kmeans, output_kmeans, metrics_kmeans
         elif max_score == score_spectral_clustering:
             self.estimator = self.estimator_spectral_clustering
+            logger.info(f'Spectral Clustering is the best')
             return model_spectral_clustering, output_spectral_clustering, metrics_spectral_clustering
 
     def infer(self, df, options):
-        output = self.estimator.infer(df, options) # model_file = options['model']
-        # kmeans_model = model_file[MODEL_TYPE_SINGLE]
-        # feature_attrs = options['feature_attrs']
-        # feature_data = df[feature_attrs]
-        # ss_feature_data = self.ss_feature.fit_transform(feature_data)
-        # y_pred = kmeans_model.predict(ss_feature_data)
-        # output = pd.concat([df, pd.DataFrame(y_pred, columns=[CLUTER_NAME])], axis=1)
-
+        output = self.estimator.infer(df, options)
         return output
 
 
