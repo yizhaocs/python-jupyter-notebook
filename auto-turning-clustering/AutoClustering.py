@@ -210,4 +210,4 @@ if __name__ == '__main__':
     t0 = datetime.now()
     # host_health_test(True)
     test_iris(True)
-    print("Time to compute:", (datetime.now() - t0)) # Time to compute: 0:00:00.008133
+    print("Time to compute:", (datetime.now() - t0))

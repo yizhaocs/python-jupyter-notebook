@@ -44,8 +44,6 @@ class BIRCH_with_auto_turning(AbstractCluster):
                           'threshold': [0.1, 0.2, 0.3]
                           }
 
-            # cv = [(slice(None), slice(None))]
-
             scoring = options['algo_params']['scoring']
             if scoring == 'silhouette_score':
                 self.estimator = GridSearchCV(_Birch(), param_grid, n_jobs=-1, cv=5, scoring=silhouette_score)
@@ -57,17 +55,17 @@ class BIRCH_with_auto_turning(AbstractCluster):
         feature_attrs = options['feature_attrs']
         feature_data = df[feature_attrs]
 
+        # 1. Standardlize the train and test data of features.
+        ss_feature_train = self.ss_feature.fit_transform(feature_data)
+
+        # 2. Train the model with KMeans
+        self.estimator.fit(ss_feature_train)
+
+        # 3. Evaluate the model performance
+        y_labels = self.estimator.predict(ss_feature_train)
+
+        metrics = self.evaluate(ss_feature_train, y_labels)
         if not options.get('is_tune', False):
-            # 1. Standardlize the train and test data of features.
-            ss_feature_train = self.ss_feature.fit_transform(feature_data)
-
-            # 2. Train the model with KMeans
-            self.estimator.fit(ss_feature_train)
-
-            # 3. Evaluate the model performance
-            y_labels = self.estimator.predict(ss_feature_train)
-
-            metrics = self.evaluate(ss_feature_train, y_labels)
             sub_cluster_centers = list(self.estimator.subcluster_centers_)
             centers = {i: list(sub_cluster_centers[i]) for i in range(len(sub_cluster_centers))}
             fitted_parameter = {
@@ -75,16 +73,6 @@ class BIRCH_with_auto_turning(AbstractCluster):
                 'cluster_centers': centers
             }
         else:
-            # 1. Standardlize the train and test data of features.
-            ss_feature_train = self.ss_feature.fit_transform(feature_data)
-
-            # 2. Train the model with KMeans
-            self.estimator.fit(ss_feature_train)
-
-            # 3. Evaluate the model performance
-            y_labels = self.estimator.predict(ss_feature_train)
-
-            metrics = self.evaluate(ss_feature_train, y_labels)
             sub_cluster_centers = list(self.estimator.best_estimator_.subcluster_centers_)
             centers = {i: list(sub_cluster_centers[i]) for i in range(len(sub_cluster_centers))}
             fitted_parameter = {
@@ -193,9 +181,9 @@ def host_health_test(is_tune):
 
 if __name__ == '__main__':
     ''' This is used for algorithm level test, should be run at the same dir of this file. 
-            python KMeans.py
+            python BIRCH.py
     '''
     # host_health_test(False)
     # host_health_test(True)
-    # test_iris(False)
-    test_iris(True)
+    test_iris(False)
+    # test_iris(True)
