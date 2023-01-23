@@ -39,7 +39,7 @@ class SpectralClustering_with_auto_turning(AbstractCluster):
             )
             self.estimator = _SpectralClustering(**out_params)
         else:
-            param_grid = {'n_clusters': list(range(2, 11)),
+            param_grid = {'n_clusters': list(range(options['algo_params']['min_n_clusters'], options['algo_params']['max_n_clusters'])),
                           'assign_labels': ['kmeans', 'discretize'],
                           'n_neighbors': [5, 10, 15],
                           'gamma': [0.01, 0.1, 1],
@@ -117,7 +117,9 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = SpectralClustering_with_auto_turning(options)
@@ -154,7 +156,9 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = SpectralClustering_with_auto_turning(options)

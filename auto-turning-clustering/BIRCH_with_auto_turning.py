@@ -39,7 +39,7 @@ class BIRCH_with_auto_turning(AbstractCluster):
 
             self.estimator = _Birch(**out_params)
         else:
-            param_grid = {'n_clusters': list(range(2, 11)),
+            param_grid = {'n_clusters': list(range(options['algo_params']['min_n_clusters'], options['algo_params']['max_n_clusters'])),
                           'branching_factor': [50, 100, 150],
                           'threshold': [0.1, 0.2, 0.3]
                           }
@@ -126,7 +126,9 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = BIRCH_with_auto_turning(options)
@@ -163,7 +165,9 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = BIRCH_with_auto_turning(options)

@@ -40,7 +40,7 @@ class KMeans_with_auto_turning(AbstractCluster):
             self.estimator = _KMeans(**input_params)
         else:
             param_grid = {
-                          'n_clusters': list(range(2, 11)),
+                          'n_clusters': list(range(options['algo_params']['min_n_clusters'], options['algo_params']['max_n_clusters'])),
                           'n_init': [10, 20, 30, 40, 50],
                           'max_iter': [100, 200, 300, 400, 500],
                           'init': ['k-means++', 'random'],
@@ -115,7 +115,9 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = KMeans_with_auto_turning(options)
@@ -150,7 +152,9 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = KMeans_with_auto_turning(options)

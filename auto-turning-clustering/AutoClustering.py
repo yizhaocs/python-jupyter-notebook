@@ -18,10 +18,6 @@ from BIRCH_with_auto_turning import BIRCH_with_auto_turning
 from DBSCAN_with_auto_turning import DBSCAN_with_auto_turning
 from KMeans_with_auto_turning import KMeans_with_auto_turning
 from SpectralClustering_with_auto_turning import SpectralClustering_with_auto_turning
-import warnings
-
-# filter out the warnings
-warnings.simplefilter("ignore")
 logger = get_logger(__file__)
 
 
@@ -125,7 +121,9 @@ def test_iris(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = AutoClustering(options)
@@ -162,7 +160,9 @@ def host_health_test(is_tune):
         'train_factor': 0.9,
         'is_tune': is_tune,
         'algo_params': {
-            'scoring': 'silhouette_score'
+            'scoring': 'silhouette_score',
+            'min_n_clusters': 2,
+            'max_n_clusters': 11
         }
     }
     algo = AutoClustering(options)
